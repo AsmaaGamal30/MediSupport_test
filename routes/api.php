@@ -2,18 +2,36 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController};
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+//admin auth
+Route::controller(AdminAuthController::class)->prefix('auth/admin')->group(
+    function () {
+        Route::post('/login', 'login');
+        Route::post('/logout', 'logout');
+        Route::post('/refresh', 'refresh');
+        Route::get('/user-profile', 'userProfile');
+    }
+);
+
+//doctor auth
+Route::controller(DoctorAuthController::class)->prefix('auth/doctor')->group(
+    function () {
+        Route::post('/login',  'login');
+        //the admin shold register the doctor
+        Route::post('/register', 'register')->middleware('auth:admin');
+        Route::post('/logout', 'logout');
+        Route::post('/refresh', 'refresh');
+        Route::get('/user-profile',  'userProfile');
+    }
+);
+
+//user auth
+Route::controller(UserAuthController::class)->prefix('auth/user')->group(function () {
+    Route::post('/login',  'login');
+    Route::post('/register', 'register');
+    Route::post('/logout', 'logout');
+    Route::post('/refresh',  'refresh');
+    Route::get('/user-profile', 'userProfile');
 });

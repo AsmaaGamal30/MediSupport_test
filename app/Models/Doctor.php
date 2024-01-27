@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class Doctor extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
     /**
@@ -17,11 +17,17 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
+        'admin_id',
         'first_name',
         'last_name',
         'email',
         'password',
-        'photo'
+        'photo',
+        'phone',
+        'specialization',
+        'bio',
+        'price',
+        'clinic_location',
     ];
     /**
      * The attributes that should be hidden for arrays.
