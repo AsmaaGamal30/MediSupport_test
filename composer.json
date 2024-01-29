@@ -9,6 +9,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
+        "laravel/socialite": "^5.11",
         "laravel/tinker": "^2.8",
         "tymon/jwt-auth": "^2.0"
     },
@@ -22,6 +23,11 @@
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
+
+        "files": [
+            "app/helpers.php"
+        ],
+        
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
