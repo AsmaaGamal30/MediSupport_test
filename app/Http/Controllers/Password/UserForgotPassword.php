@@ -29,12 +29,19 @@ class UserForgotPassword extends Controller
 
         $email = $request->email;
 
-        // Check if the email exists in the Client table
+        // Check if the email exists in the User table
         $user = User::where('email', $email)->first();
+
         if ($user) {
-            // Send reset password email to client
+            // Check if the user logged in with social credentials
+            if ($user->password === null) {
+                // If password is null, display error message
+                return response()->json(['message' => 'Social login users do not have passwords.'], 400);
+            }
+
+            // Send reset password email to user
             Mail::to($email)->send(new SendMail($this->generateVerificationCode($email)));
-            return response()->json(['message' => 'Verification code sent to User ']);
+            return response()->json(['message' => 'Verification code sent to user.']);
         }
 
         // Email does not belong to any user
