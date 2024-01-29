@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController};
+use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
 use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword, DoctorForgotPassword, DoctorResetPassword};
 
 
@@ -38,6 +38,13 @@ Route::controller(UserAuthController::class)->prefix('auth/user')->group(functio
     Route::get('/user-profile', 'userProfile');
 }
 );
+
+//user social auth
+Route::controller(UserSocialAuthController::class)->prefix('auth/user')->group(function () {
+    Route::get('/{provider}/redirect',  'redirect');
+    Route::get('/{provider}/callback',  'callback');
+    Route::post('/social-login', 'handleProviderCallback');
+});
 
 //user password
 Route::controller(UserForgotPassword::class)->prefix('auth/user')->group(function () {
