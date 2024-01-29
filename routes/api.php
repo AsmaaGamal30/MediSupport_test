@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController};
+use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, SocialLoginController};
 
 
 //admin auth
@@ -34,4 +34,11 @@ Route::controller(UserAuthController::class)->prefix('auth/user')->group(functio
     Route::post('/logout', 'logout');
     Route::post('/refresh',  'refresh');
     Route::get('/user-profile', 'userProfile');
+});
+
+//user social auth
+Route::controller(SocialLoginController::class)->prefix('auth/user')->group(function () {
+    Route::get('/{provider}/redirect',  'redirect');
+    Route::get('/{provider}/callback',  'callback');
+    Route::post('/social-login', 'handleProviderCallback');
 });
