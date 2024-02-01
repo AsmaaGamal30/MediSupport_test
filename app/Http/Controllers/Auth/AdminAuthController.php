@@ -32,10 +32,10 @@ class AdminAuthController extends Controller
     {
         $validator = Validator::make($request->all(), $request->rules());
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return $this->error($validator->errors(), 422);
         }
         if (!$token = auth()->guard('admin')->attempt($request->validated())) {
-            return response()->json(['message' => 'Invalid email or password'], 401);
+            return $this->error('Invalid email or password', 401);
         }
         return $this->createNewToken($token);
     }
@@ -48,7 +48,7 @@ class AdminAuthController extends Controller
     public function logout()
     {
         auth()->guard('admin')->logout();
-        return response()->json(['message' => 'admin successfully signed out']);
+        return $this->success('Admin successfully signed out');
     }
     /**
      * Refresh a token.
