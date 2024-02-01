@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\AuthRequests;
+namespace App\Http\Requests\HealthMatrixRequests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserRegisterRequest extends FormRequest
+class BloodPressureRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,10 @@ class UserRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => 'required|string|between:2,20',
-            'last_name' => 'required|string|between:2,30',
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|confirmed|string|min:6',
-            'photo' => 'image|mimes:jpg,png,jpeg',
+            'user_id' => 'exists:users,id',
+            'pressure_advice_id' => 'exists:pressure_advice,id',
+            'systolic' => 'required|integer',
+            'diastolic' => 'required|integer',
         ];
     }
 }

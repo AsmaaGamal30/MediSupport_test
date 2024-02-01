@@ -34,11 +34,11 @@ class UserAuthController extends Controller
     {
         $validator = Validator::make($request->all(), $request->rules());
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return $this->error($validator->errors(), 422);
         }
 
         if (!$token = auth()->guard('user')->attempt($request->validated())) {
-            return response()->json(['message' => 'Invalid email or password'], 401);
+            return $this->error('Invalid email or password', 401);
         }
         return $this->createNewToken($token);
     }
@@ -51,7 +51,7 @@ class UserAuthController extends Controller
     {
         $validator = Validator::make($request->all(), $request->rules());
         if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
+            return $this->error($validator->errors()->toJson(), 400);
         }
 
         $user = User::create(array_merge(
@@ -61,10 +61,7 @@ class UserAuthController extends Controller
                 'photo' => $request->file('photo')->store('users')
             ]
         ));
-        return response()->json([
-            'message' => 'user successfully registered',
-            'user' => $user
-        ], 201);
+        return $this->success('User successfully registered', 201);
     }
 
     /**
@@ -75,7 +72,7 @@ class UserAuthController extends Controller
     public function logout()
     {
         auth()->guard('user')->logout();
-        return response()->json(['message' => 'user successfully signed out']);
+        return $this->success('User successfully signed out');
     }
     /**
      * Refresh a token.

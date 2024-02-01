@@ -34,11 +34,11 @@ class DoctorAuthController extends Controller
     {
         $validator = Validator::make($request->all(), $request->rules());
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return $this->error($validator->errors(), 422);
         }
 
         if (!$token = auth()->guard('doctor')->attempt($request->validated())) {
-            return response()->json(['message' => 'Invalid email or password'], 401);
+            return $this->error('Invalid email or password', 401);
         }
         return $this->createNewToken($token);
     }
@@ -51,7 +51,7 @@ class DoctorAuthController extends Controller
     {
         $validator = Validator::make($request->all(), $request->rules());
         if ($validator->fails()) {
-            return response()->json($validator->errors()->toJson(), 400);
+            return $this->error($validator->errors()->toJson(), 400);
         }
         $doctor = Doctor::create(array_merge(
             $request->validated(),
@@ -60,10 +60,7 @@ class DoctorAuthController extends Controller
                 'photo' => $request->file('photo')->store('doctors')
             ]
         ));
-        return response()->json([
-            'message' => 'doctor successfully registered',
-            'doctor' => $doctor
-        ], 201);
+        return $this->success('Doctor successfully registered', 201);
     }
 
     /**
@@ -74,7 +71,7 @@ class DoctorAuthController extends Controller
     public function logout()
     {
         auth()->guard('doctor')->logout();
-        return response()->json(['message' => 'doctor successfully signed out']);
+        return $this->success('Doctor successfully signed out');
     }
     /**
      * Refresh a token.
