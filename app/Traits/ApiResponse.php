@@ -22,5 +22,17 @@ trait ApiResponse{
         return $this->Apiresponse($message,$data,false,$statuscode);
     }
 
+    // ApiResponse.php
+
+public function successData($message, $statuscode = 200, $data = null)
+{
+    return response()->json([
+        'success' => true,
+        'message' => $message,
+        'data' => $data,
+    ], $statuscode);
+}
+
+
 
 }
