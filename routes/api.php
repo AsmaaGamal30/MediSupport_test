@@ -30,6 +30,17 @@ Route::controller(DoctorAuthController::class)->prefix('auth/doctor')->group(
     }
 );
 
+//doctor password
+Route::controller(DoctorForgotPassword::class)->prefix('auth/doctor')->group(function () {
+    Route::post('/forgot-password', 'forgot');
+});
+Route::controller(DoctorResetPassword::class)->prefix('auth/doctor')->group(function () {
+    Route::post('/verfiy-code', 'verifyVerificationCode');
+    Route::post('/reset-password', 'resetPassword');
+});
+
+
+
 //user auth
 Route::controller(UserAuthController::class)->prefix('auth/user')->group(
     function () {
@@ -65,13 +76,4 @@ Route::controller(BloodPressureController::class)->middleware('auth:user')->pref
     Route::get('/get-latest-measurement', 'getLatestMeasurement');
     Route::get('/get-latest-three-measurements', 'getLatestThreeMeasurements');
     Route::get('/get-all-measurements', 'getAllMeasurements');
-});
-
-//doctor password
-Route::controller(DoctorForgotPassword::class)->prefix('auth/doctor')->group(function () {
-    Route::post('/forgot-password', 'forgot');
-});
-Route::controller(DoctorResetPassword::class)->prefix('auth/doctor')->group(function () {
-    Route::post('/verfiy-code', 'verifyVerificationCode');
-    Route::post('/reset-password', 'resetPassword');
 });
