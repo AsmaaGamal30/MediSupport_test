@@ -1,6 +1,7 @@
 <?php
 namespace App\Traits;
 trait ApiResponse{
+
     public function apiResponse(string $message, $data,bool $error,int $statuscode){
 
         return response()->json(
@@ -20,5 +21,6 @@ trait ApiResponse{
     public function sendData(string $message,$data,int $statuscode=200){
         return $this->Apiresponse($message,$data,false,$statuscode);
     }
+
 
 }

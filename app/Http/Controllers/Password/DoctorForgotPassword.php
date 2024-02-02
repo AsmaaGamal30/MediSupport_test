@@ -3,18 +3,20 @@
 namespace App\Http\Controllers\Password;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\SendMail;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 use App\Models\Doctor;
-
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
+use App\Mail\SendMail;
 
 class DoctorForgotPassword extends Controller
 {
+    use ApiResponse; 
+
     public function forgot(Request $request)
     {
         // Validate the request data
@@ -25,21 +27,21 @@ class DoctorForgotPassword extends Controller
         // Check if validation fails
         if ($validator->fails()) {
             // Return error response with validation messages
-            return response()->json(['errors' => $validator->errors()], 422);
+            return $this->error($validator->errors()->first(), 422);
         }
 
         $email = $request->email;
 
-        // Check if the email exists in the Client table
+        // Check if the email exists in the Doctor table
         $doctor = Doctor::where('email', $email)->first();
         if ($doctor) {
             // Send reset password email to client
             Mail::to($email)->send(new SendMail($this->generateVerificationCode($email)));
-            return response()->json(['message' => 'Verification code sent to User ']);
+            return $this->success('Verification code sent to User');
         }
 
         // Email does not belong to any user
-        return response()->json(['message' => 'User not found'], 404);
+        return $this->error('User not found', 404);
     }
 
     private function generateVerificationCode($email)

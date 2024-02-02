@@ -11,9 +11,12 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\User;
+use App\Traits\ApiResponse;
 
 class UserForgotPassword extends Controller
 {
+    use ApiResponse;
+
     public function forgot(Request $request)
     {
         // Validate the request data
@@ -24,7 +27,7 @@ class UserForgotPassword extends Controller
         // Check if validation fails
         if ($validator->fails()) {
             // Return error response with validation messages
-            return response()->json(['errors' => $validator->errors()], 422);
+            return $this->error($validator->errors()->first(), 422);
         }
 
         $email = $request->email;
@@ -36,16 +39,16 @@ class UserForgotPassword extends Controller
             // Check if the user logged in with social credentials
             if ($user->password === null) {
                 // If password is null, display error message
-                return response()->json(['message' => 'Social login users do not have passwords.'], 400);
+                return $this->error('Social login users do not have passwords.', 400);
             }
 
             // Send reset password email to user
             Mail::to($email)->send(new SendMail($this->generateVerificationCode($email)));
-            return response()->json(['message' => 'Verification code sent to user.']);
+            return $this->success('Verification code sent to user.');
         }
 
         // Email does not belong to any user
-        return response()->json(['message' => 'User not found'], 404);
+        return $this->error('User not found', 404);
     }
 
     private function generateVerificationCode($email)
@@ -61,7 +64,6 @@ class UserForgotPassword extends Controller
         $this->scheduleCleanupTask();
 
         return $verificationCode;
-
     }
 
     private function scheduleCleanupTask()
