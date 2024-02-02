@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
-use App\Http\Controllers\HealthMatrix\BloodPressureController;
+use App\Http\Controllers\HealthMatrix\{BloodPressureController, BMIController};
 use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword, DoctorForgotPassword, DoctorResetPassword};
 
 
@@ -76,4 +76,11 @@ Route::controller(BloodPressureController::class)->middleware('auth:user')->pref
     Route::get('/get-latest-measurement', 'getLatestMeasurement');
     Route::get('/get-latest-three-measurements', 'getLatestThreeMeasurements');
     Route::get('/get-all-measurements', 'getAllMeasurements');
+});
+
+//user bmi
+Route::controller(BMIController::class)->middleware('auth:user')->prefix('user/bmi')->group(function () {
+Route::post('/store' ,'store');
+Route::get('/get-last-record', 'getLastRecord');
+Route::get('/get-all-records', 'getAllRecords');
 });
