@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
-use App\Http\Controllers\HealthMatrix\{BloodPressureController, BMIController};
+use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController};
 use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword, DoctorForgotPassword, DoctorResetPassword};
 
 
@@ -80,7 +80,37 @@ Route::controller(BloodPressureController::class)->middleware('auth:user')->pref
 
 //user bmi
 Route::controller(BMIController::class)->middleware('auth:user')->prefix('user/bmi')->group(function () {
-Route::post('/store' ,'store');
-Route::get('/get-last-record', 'getLastRecord');
-Route::get('/get-all-records', 'getAllRecords');
+    Route::post('/store', 'store');
+    Route::get('/get-last-record', 'getLastRecord');
+    Route::get('/get-all-records', 'getAllRecords');
 });
+
+//user blood sugar
+Route::controller(BloodSugarController::class)->middleware(['custom-auth:' . 'user'])->prefix('user/blood-sugar')->group(function () {
+    Route::post('/store', 'storeBloodSugar');
+    Route::get('/get-all-records', 'getAllBloodSugarRecords');
+    Route::get('/get-last-three-records', 'getLastThreeBloodSugarRecords');
+    Route::get('/get-last-seven-records', 'getLastSevenBloodSugarRecords');
+    Route::get('/get-last-record', 'getLastBloodSugarRecord');
+    Route::get('/get-recommended-advice', 'getUserRecommendedAdvice');
+    Route::get('/get-all-status', 'getAllBloodSugarStatus');
+});
+// Route::group(
+//     [
+//         'middleware' => ['custom-auth:' . 'user'],
+//         'prefix' => 'user/blood-sugar'
+//     ],
+//     function () {
+//         Route::controller(BloodSugarController::class)->group(
+//             function () {
+//                 Route::post('/store', 'storeBloodSugar');
+//                 Route::get('/get-all-records', 'getAllBloodSugarRecords');
+//                 Route::get('/get-last-three-records', 'getLastThreeBloodSugarRecords');
+//                 Route::get('/get-last-seven-records', 'getLastSevenBloodSugarRecords');
+//                 Route::get('/get-last-record', 'getLastBloodSugarRecord');
+//                 Route::get('/get-recommended-advice', 'getUserRecommendedAdvice');
+//                 Route::get('/get-all-status', 'getAllBloodSugarStatus');
+//             }
+//         );
+//     }
+// );
