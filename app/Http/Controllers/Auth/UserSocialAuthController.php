@@ -6,13 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthRequests\UserSocialAuthRequest;
 use App\Http\Resources\User\UserSocialAuthResource;
 use App\Models\User;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+use function Laravel\Prompts\error;
+
 class UserSocialAuthController extends Controller
 {
+    use ApiResponse;
+
      // Redirect the user to the OAuth provider's authentication page.
      public function redirect($provider)
      {
@@ -37,10 +42,8 @@ class UserSocialAuthController extends Controller
         try {
             $socialiteUser = Socialite::driver($provider)->stateless()->userFromToken($accessProviderToken);
         } catch (\Exception $e) {
-            return responseFormat(
-                data: null,
-                message: 'Invalid provider or token',
-                status: 404
+            return $this->error(
+              message: 'Invalid provider or token',
             );
         }
 
@@ -59,10 +62,8 @@ class UserSocialAuthController extends Controller
         }
         // If a user with the same email exists with a different provider, return an error response
         elseif ($userWithEmail) {
-            return responseFormat(
-                data: null,
+            return $this->error(
                 message: 'Email is already associated with another account',
-                status: 404
             );
         }
         // If the user doesn't exist, create a new user and log in
@@ -84,13 +85,14 @@ class UserSocialAuthController extends Controller
 
         $socialLoginResource = new UserSocialAuthResource(Auth::user());
 
-        return responseFormat(
+        return $this->apiResponse(
             data: [
                 'token' => $token,
                 'user' => $socialLoginResource,
             ],
             message: "User Login Success",
-            status: 200
+            statuscode: 200,
+            error: false
         );
     }// end handleProviderCallback
 }
