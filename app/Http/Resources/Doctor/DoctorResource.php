@@ -4,6 +4,7 @@ namespace App\Http\Resources\Doctor;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Controllers\Rating\RatingController;
 
 class DoctorResource extends JsonResource
 {
@@ -14,6 +15,8 @@ class DoctorResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+         // Calculate average rating for the client
+         $averageRating = (new RatingController())->getDoctorAverageRating($this->id);
         return [
             'admin_id' => $this->admin_id,
             'first_name' => $this->first_name,
@@ -25,6 +28,8 @@ class DoctorResource extends JsonResource
             'bio' => $this->bio,
             'price' => $this->price,
             'clinic_location' => $this->clinic_location,
+            'average_rating' => $averageRating,
+
         ];
     }
 }
