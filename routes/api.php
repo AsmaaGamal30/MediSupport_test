@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
 use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController};
 use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword, DoctorForgotPassword, DoctorResetPassword};
-
+use App\Http\Controllers\Rating\{RatingController};
 
 
 //admin auth
@@ -114,3 +114,10 @@ Route::controller(BloodSugarController::class)->middleware(['custom-auth:' . 'us
 //         );
 //     }
 // );
+
+
+//Rating
+Route::controller(RatingController::class)->prefix('auth/user')->group(function () {
+    Route::post('/ratings', 'store');
+    Route::post('/average-rating', 'getDoctorAverageRating');
+});
