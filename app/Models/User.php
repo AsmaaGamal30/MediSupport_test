@@ -25,6 +25,10 @@ class User extends Authenticatable implements JWTSubject
         'provider_id',
         'provider_name'
     ];
+    public function doctors()
+    {
+        return $this->belongsToMany(Doctor::class)->withPivot('rate')->withTimestamps();
+    }
     /**
      * The attributes that should be hidden for arrays.
      *
