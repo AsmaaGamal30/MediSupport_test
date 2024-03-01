@@ -121,7 +121,6 @@ Route::controller(BloodSugarController::class)->middleware(['custom-auth:' . 'us
 //Rating
 Route::controller(RatingController::class)->prefix('auth/user')->group(function () {
     Route::post('/ratings', 'store');
-    Route::post('/average-rating', 'getDoctorAverageRating');
 });
 
 //contact
