@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use App\Models\Rating;
 use App\Models\Doctor;
-use App\Traits\ApiResponse; 
+use App\Traits\ApiResponse;
 
 class RatingController extends Controller
 {
@@ -57,59 +57,27 @@ class RatingController extends Controller
         }
     }
 
-    public function getDoctorAverageRating(Request $request)
-    {
-        try {
-            $request->validate([
-                'doctor_id' => 'required|exists:doctors,id'
-            ]);
+    public function getDoctorAverageRating(Request $request, $doctorId)
+{
+    try {
+        // Check if the doctor exists
+        $doctor = Doctor::find($doctorId);
 
-            // Get the doctor ID from the request body
-            $doctorId = $request->input('doctor_id');
-
-            // Check if the user is authenticated as a user
-            if (!Auth::guard('user')->check()) {
-                throw ValidationException::withMessages(['Unauthenticated']);
-            }
-
-            // Get the authenticated user
-            $user = Auth::guard('user')->user();
-
-            // Check if the doctor exists
-            $doctor = Doctor::find($doctorId);
-
-            if (!$doctor) {
-                throw ValidationException::withMessages(['Doctor not found']);
-            }
-
-            // Calculate average rating for the specified doctor
-            $averageRating = Rating::where('doctor_id', $doctorId)->avg('rate');
-
-            // Convert numeric average rating to star rating
-            $starRating = $this->convertToStarRating($averageRating);
-
-            // Return the doctor average rating in JSON format using the ApiResponse trait method
-            return $this->successData('Doctor average rating', 200, ['average_rating' => $starRating]);
-        } catch (ValidationException $e) {
-            // Return an error response using the ApiResponse trait method
-            return $this->error($e->validator->errors()->first(), 422);
-        } catch (\Exception $e) {
-            // Return an error response using the ApiResponse trait method
-            return $this->error($e->getMessage(), 500);
-        }
-    }
-
-    // Helper function to convert numeric rating to star rating
-    private static function convertToStarRating($numericRating)
-    {
-        if ($numericRating === null) {
-            return '☆☆☆☆☆'; // If no ratings found, return 0 stars
+        if (!$doctor) {
+            throw ValidationException::withMessages(['Doctor not found']);
         }
 
-        $fullStars = intval($numericRating);
-        $halfStar = ($numericRating - $fullStars) >= 0.5 ? 1 : 0;
-        $emptyStars = 5 - $fullStars - $halfStar;
+        // Calculate average rating for the specified doctor
+        $averageRating = Rating::where('doctor_id', $doctorId)->avg('rate');
 
-        return str_repeat('★', $fullStars) . str_repeat('½', $halfStar) . str_repeat('☆', $emptyStars);
+        // Round the average rating to one decimal place
+        $roundedAverageRating = round($averageRating, 1);
+
+        // Return the doctor average rating as a number (integer or float)
+        return $this->successData(null, 200, ['average_rating' => $roundedAverageRating]);
+    } catch (\Exception $e) {
+        // Return an error response using the ApiResponse trait method
+        return $this->error($e->getMessage(), 500);
     }
+}
 }
