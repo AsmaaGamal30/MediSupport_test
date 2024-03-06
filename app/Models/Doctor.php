@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -70,4 +71,23 @@ class Doctor extends Authenticatable implements JWTSubject
         return [];
     }
     
+    public function rates(): HasMany
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    public function times(): HasMany
+    {
+        return $this->hasMany(Time::class);
+    }
+
+    public function dates(): HasMany
+    {
+        return $this->hasMany(Date::class);
+    }
 }
