@@ -7,8 +7,8 @@ use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarContro
 use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword, DoctorForgotPassword, DoctorResetPassword};
 use App\Http\Controllers\Rating\{RatingController};
 use App\Http\Controllers\contact\{ContactController};
-
-
+use App\Http\Controllers\OfflineBooking\BookingController;
+use App\Http\Controllers\OfflineBooking\OfflineDoctorsController;
 
 //admin auth
 Route::controller(AdminAuthController::class)->prefix('auth/admin')->group(
@@ -97,26 +97,6 @@ Route::controller(BloodSugarController::class)->middleware(['custom-auth:' . 'us
     Route::get('/get-recommended-advice', 'getUserRecommendedAdvice');
     Route::get('/get-all-status', 'getAllBloodSugarStatus');
 });
-// Route::group(
-//     [
-//         'middleware' => ['custom-auth:' . 'user'],
-//         'prefix' => 'user/blood-sugar'
-//     ],
-//     function () {
-//         Route::controller(BloodSugarController::class)->group(
-//             function () {
-//                 Route::post('/store', 'storeBloodSugar');
-//                 Route::get('/get-all-records', 'getAllBloodSugarRecords');
-//                 Route::get('/get-last-three-records', 'getLastThreeBloodSugarRecords');
-//                 Route::get('/get-last-seven-records', 'getLastSevenBloodSugarRecords');
-//                 Route::get('/get-last-record', 'getLastBloodSugarRecord');
-//                 Route::get('/get-recommended-advice', 'getUserRecommendedAdvice');
-//                 Route::get('/get-all-status', 'getAllBloodSugarStatus');
-//             }
-//         );
-//     }
-// );
-
 
 //Rating
 Route::controller(RatingController::class)->prefix('auth/user')->group(function () {
@@ -126,4 +106,18 @@ Route::controller(RatingController::class)->prefix('auth/user')->group(function 
 //contact
 Route::controller(ContactController::class)->group(function () {
     Route::post('/contact','store');
+});
+
+Route::controller(OfflineDoctorsController::class)->middleware(['custom-auth:' . 'user'])->prefix('auth/user')->group(function () {
+    Route::get('/get-top-doctors', 'selectTopDoctorsByRating');
+    Route::get('/get-all-doctors', 'selectDoctors');
+    Route::get('/search-doctors', 'searchDoctors');
+});
+
+Route::controller(BookingController::class)->middleware(['custom-auth:' . 'user'])->prefix('user/booking')->group(function () {
+    Route::get('/get-doctor-details', 'getDoctorDetails');
+    Route::get('/get-times', 'getDoctorDateTimes');
+    Route::post('/appointment', 'BookAppointment');
+    Route::get('/get-all-booking', 'selectUserBooking');
+    Route::delete('/delete-booking', 'deleteBooking');
 });

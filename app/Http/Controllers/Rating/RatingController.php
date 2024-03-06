@@ -57,27 +57,5 @@ class RatingController extends Controller
         }
     }
 
-    public function getDoctorAverageRating(Request $request, $doctorId)
-{
-    try {
-        // Check if the doctor exists
-        $doctor = Doctor::find($doctorId);
 
-        if (!$doctor) {
-            throw ValidationException::withMessages(['Doctor not found']);
-        }
-
-        // Calculate average rating for the specified doctor
-        $averageRating = Rating::where('doctor_id', $doctorId)->avg('rate');
-
-        // Round the average rating to one decimal place
-        $roundedAverageRating = round($averageRating, 1);
-
-        // Return the doctor average rating as a number (integer or float)
-        return $this->successData(null, 200, ['average_rating' => $roundedAverageRating]);
-    } catch (\Exception $e) {
-        // Return an error response using the ApiResponse trait method
-        return $this->error($e->getMessage(), 500);
-    }
-}
 }
