@@ -40,6 +40,7 @@ class UserAuthController extends Controller
         if (!$token = auth()->guard('user')->attempt($request->validated())) {
             return $this->error('Invalid email or password', 401);
         }
+        auth()->guard('user')->user()->update(['active_status' => 1]);
         return $this->createNewToken($token);
     }
     /**
@@ -58,7 +59,7 @@ class UserAuthController extends Controller
             $request->validated(),
             [
                 'password' => bcrypt($request->password),
-                'photo' => $request->file('photo')->store('users')
+                'avatar' => $request->file('avatar')->store('users')
             ]
         ));
         return $this->success('User successfully registered', 201);
@@ -71,6 +72,10 @@ class UserAuthController extends Controller
      */
     public function logout()
     {
+        $user = auth()->guard('user')->user();
+        if ($user) {
+            $user->update(['active_status' => 0]);
+        }
         auth()->guard('user')->logout();
         return $this->success('User successfully signed out');
     }

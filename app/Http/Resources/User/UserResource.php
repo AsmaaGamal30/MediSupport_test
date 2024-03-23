@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'last_name' => $this->last_name,
             'email' => $this->email,
             'photo' => $this->photo,
+            'active_status' =>$this->active_status,
         ];
     }
 }

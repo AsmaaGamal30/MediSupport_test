@@ -72,7 +72,7 @@ class UserSocialAuthController extends Controller
                 'email' => $socialiteUser->email,
                 'first_name' => $provider == 'google' ? $socialiteUser->user['given_name'] : $socialiteUser->user['name'],
                 'last_name' => $provider == 'google' ? $socialiteUser->user['family_name'] : '',
-                'photo' => $socialiteUser->avatar,
+                'avatar' => $socialiteUser->avatar,
                 'provider_id' => $socialiteUser->id,
                 'provider_name' => $provider,
             ]);

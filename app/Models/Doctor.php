@@ -23,12 +23,14 @@ class Doctor extends Authenticatable implements JWTSubject
         'last_name',
         'email',
         'password',
-        'photo',
+        'avatar',
         'phone',
         'specialization',
         'bio',
         'price',
         'clinic_location',
+        'active_status',
+        'working_hours',
     ];
     public function users()
     {
@@ -70,7 +72,7 @@ class Doctor extends Authenticatable implements JWTSubject
     {
         return [];
     }
-    
+
     public function rates(): HasMany
     {
         return $this->hasMany(Rating::class);
@@ -89,5 +91,10 @@ class Doctor extends Authenticatable implements JWTSubject
     public function dates(): HasMany
     {
         return $this->hasMany(Date::class);
+    }
+
+    public function articles(): HasMany
+    {
+        return $this->hasMany(Article::class);
     }
 }
