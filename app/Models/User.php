@@ -22,9 +22,10 @@ class User extends Authenticatable implements JWTSubject
         'last_name',
         'email',
         'password',
-        'photo',
+        'avatar',
         'provider_id',
-        'provider_name'
+        'provider_name',
+        'active_status'
     ];
     public function doctors()
     {
@@ -75,5 +76,10 @@ class User extends Authenticatable implements JWTSubject
     public function rates(): HasMany
     {
         return $this->hasMany(Rating::class);
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
     }
 }

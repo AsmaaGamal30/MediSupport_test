@@ -27,12 +27,14 @@ class DoctorRegisterRequest extends FormRequest
             'last_name' => 'required|string|between:2,30',
             'email' => 'required|string|email|max:100|unique:doctors',
             'password' => 'required|string|min:6',
-            'photo' => 'required|image|mimes:jpg,png,jpeg',
+            'avatar' => 'required|image|mimes:jpg,png,jpeg',
             'phone' => 'required|string|max:30',
             'specialization' => 'required|string',
             'bio' => 'required|string',
             'price' => 'required|numeric',
-            'clinic_location' => 'required|string'
+            'clinic_location' => 'required|string',
+            //'active_status' => 'boolean',
+            'working_hours' => 'required|string',
         ];
     }
 }

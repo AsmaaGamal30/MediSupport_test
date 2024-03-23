@@ -40,6 +40,7 @@ class DoctorAuthController extends Controller
         if (!$token = auth()->guard('doctor')->attempt($request->validated())) {
             return $this->error('Invalid email or password', 401);
         }
+        auth()->guard('doctor')->user()->update(['active_status' => 1]);
         return $this->createNewToken($token);
     }
     /**
@@ -57,7 +58,7 @@ class DoctorAuthController extends Controller
             $request->validated(),
             [
                 'password' => bcrypt($request->password),
-                'photo' => $request->file('photo')->store('doctors')
+                'avatar' => $request->file('avatar')->store('doctors')
             ]
         ));
         return $this->success('Doctor successfully registered', 201);
@@ -70,6 +71,10 @@ class DoctorAuthController extends Controller
      */
     public function logout()
     {
+        $doctor = auth()->guard('doctor')->user();
+        if ($doctor) {
+            $doctor->update(['active_status' => 0]);
+        }
         auth()->guard('doctor')->logout();
         return $this->success('Doctor successfully signed out');
     }

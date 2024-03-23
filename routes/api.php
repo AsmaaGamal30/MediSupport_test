@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Article\ArticleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
@@ -40,6 +41,8 @@ Route::controller(DoctorResetPassword::class)->prefix('auth/doctor')->group(func
     Route::post('/verfiy-code', 'verifyVerificationCode');
     Route::post('/reset-password', 'resetPassword');
 });
+
+
 
 
 
@@ -105,7 +108,7 @@ Route::controller(RatingController::class)->prefix('auth/user')->group(function 
 
 //contact
 Route::controller(ContactController::class)->group(function () {
-    Route::post('/contact','store');
+    Route::post('/contact', 'store');
 });
 
 Route::controller(OfflineDoctorsController::class)->middleware(['custom-auth:' . 'user'])->prefix('auth/user')->group(function () {
@@ -121,3 +124,10 @@ Route::controller(BookingController::class)->middleware(['custom-auth:' . 'user'
     Route::get('/get-all-booking', 'selectUserBooking');
     Route::delete('/delete-booking', 'deleteBooking');
 });
+
+//articles
+Route::get('/articles', [ArticleController::class, 'index'])->middleware(['auth:user,admin,doctor']);
+Route::get('/articles/{id}', [ArticleController::class, 'show'])->middleware(['auth:user,admin,doctor']);
+Route::post('/articles', [ArticleController::class, 'store'])->middleware('auth:doctor');
+Route::put('/articles/{id}', [ArticleController::class, 'update'])->middleware('auth:doctor');
+Route::delete('articles/{article}', [ArticleController::class, 'destroy'])->middleware('auth:doctor,admin');

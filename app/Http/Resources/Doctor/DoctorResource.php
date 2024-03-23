@@ -26,7 +26,8 @@ class DoctorResource extends JsonResource
             'bio' => $this->bio,
             'price' => $this->price,
             'clinic_location' => $this->clinic_location,
-            'rate' =>  $this->rates->avg('rate')
+            'rate' =>  $this->rates->avg('rate'),
+            'active_status' =>$this->active_status,
         ];
     }
 }
