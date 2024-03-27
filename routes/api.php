@@ -9,6 +9,8 @@ use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword, Doctor
 use App\Http\Controllers\Rating\{RatingController};
 use App\Http\Controllers\contact\{ContactController};
 use App\Http\Controllers\OfflineBooking\BookingController;
+use App\Http\Controllers\Chat\MessagesController;
+
 use App\Http\Controllers\OfflineBooking\OfflineDoctorsController;
 
 //admin auth
@@ -73,6 +75,78 @@ Route::controller(UserResetPassword::class)->prefix('auth/user')->group(function
     Route::post('/reset-password', 'resetPassword');
 });
 
+
+
+
+//chat
+
+/**
+ * Authentication for pusher private channels
+ */
+Route::post('/user/chat/auth', [MessagesController::class, 'pusherAuth'])->middleware('auth:user');
+Route::post('/doctor/chat/auth', [MessagesController::class, 'pusherDoctorAuth'])->middleware('auth:doctor');
+
+/**
+ *  Fetch info for specific id [user/doctor]
+ */
+Route::post('/user/chat/idInfo', [MessagesController::class, 'idDoctorFetchData'])->middleware('auth:user');
+Route::post('/doctor/chat/idInfo', [MessagesController::class, 'idFetchData'])->middleware('auth:doctor');
+
+/**
+ * Send message route
+ */
+Route::post('/user/chat/sendMessage', [MessagesController::class, 'send'])->middleware('auth:user');
+Route::post('/doctor/chat/sendMessage', [MessagesController::class, 'send'])->middleware('auth:doctor');
+
+
+/**
+ * Fetch messages
+ */
+Route::post('/user/chat/fetchMessages', [MessagesController::class, 'fetch'])->middleware('auth:user');
+Route::post('/doctor/chat/fetchMessages', [MessagesController::class, 'fetch'])->middleware('auth:doctor');
+
+
+/**
+ * Download attachments route to create a downloadable links
+ */
+Route::get('/user/chat/download/{fileName}', [MessagesController::class, 'download'])->middleware('auth:user');
+Route::get('/doctor/chat/download/{fileName}', [MessagesController::class, 'download'])->middleware('auth:doctor');
+
+
+/**
+ * Make messages as seen
+ */
+Route::post('/user/chat/makeSeen', [MessagesController::class, 'seen'])->middleware('auth:user');
+Route::post('/doctor/chat/makeSeen', [MessagesController::class, 'seen'])->middleware('auth:doctor');
+
+
+/**
+ * Get contacts
+ */
+Route::get('/doctor/chat/getDoctorContacts', [MessagesController::class, 'getDoctorContacts'])->middleware('auth:doctor');
+Route::get('/user/chat/getUserContacts', [MessagesController::class, 'getUserContacts'])->middleware('auth:user');
+
+
+
+/**
+ * Get shared photos
+ */
+Route::post('/doctor/chat/shared', [MessagesController::class, 'sharedPhotos'])->middleware('auth:doctor');
+Route::post('/user/chat/shared', [MessagesController::class, 'sharedPhotos'])->middleware('auth:user');
+
+
+/**
+ * Delete Conversation
+ */
+Route::post('/user/chat/deleteConversation', [MessagesController::class, 'deleteConversation'])->middleware('auth:user');
+Route::post('/doctor/chat/deleteConversation', [MessagesController::class, 'deleteConversation'])->middleware('auth:doctor');
+
+
+
+
+
+
+
 //user blood pressure
 Route::controller(BloodPressureController::class)->middleware('auth:user')->prefix('user/blood-pressure')->group(function () {
     Route::post('/store', 'store');
@@ -124,6 +198,8 @@ Route::controller(BookingController::class)->middleware(['custom-auth:' . 'user'
     Route::get('/get-all-booking', 'selectUserBooking');
     Route::delete('/delete-booking', 'deleteBooking');
 });
+
+
 
 //articles
 Route::get('/articles', [ArticleController::class, 'index'])->middleware(['auth:user,admin,doctor']);
