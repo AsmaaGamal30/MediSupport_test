@@ -112,4 +112,6 @@ class DoctorAuthController extends Controller
             'doctor' => auth()->guard('doctor')->user()
         ]);
     }
+
+    
 }

@@ -24,14 +24,10 @@ trait ApiResponse{
 
     // ApiResponse.php
 
-public function successData($message, $statuscode = 200, $data = null)
-{
-    return response()->json([
-        'success' => true,
-        'message' => $message,
-        'data' => $data,
-    ], $statuscode);
-}
+    public function successData($message, $data = null, $statusCode = 200)
+    {
+        return $this->apiResponse($message, $data, false, $statusCode);
+    }
 
 
 

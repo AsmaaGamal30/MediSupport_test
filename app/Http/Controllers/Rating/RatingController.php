@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers\Rating;
 
-use App\Http\Controllers\Controller;
+use App\Models\Doctor;
+use App\Models\Rating;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use App\Models\Rating;
-use App\Models\Doctor;
-use App\Traits\ApiResponse;
+use App\Http\Requests\RatingRequests\RatingRequest;
 
 class RatingController extends Controller
 {
     use ApiResponse;
 
-    public function store(Request $request)
+
+    public function store(RatingRequest  $request)
     {
         try {
             // Check if the user is authenticated as a user
@@ -56,6 +58,8 @@ class RatingController extends Controller
             return $this->error($e->getMessage(), 500);
         }
     }
+
+
 
 
 }

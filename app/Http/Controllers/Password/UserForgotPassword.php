@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\Password;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 use App\Mail\SendMail;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Cache;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
-use App\Models\User;
-use App\Traits\ApiResponse;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\Password\ForgotPasswordRequest;
 
 class UserForgotPassword extends Controller
 {
     use ApiResponse;
 
-    public function forgot(Request $request)
+    public function forgot(ForgotPasswordRequest  $request)
     {
         // Validate the request data
         $validator = Validator::make($request->all(), [

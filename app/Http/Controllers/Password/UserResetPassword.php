@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Password;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\Password\ResetPasswordRequest;
+use App\Http\Requests\Password\VerifyVerificationCodeRequest;
 
 class UserResetPassword extends Controller
 {
-    use ApiResponse; 
+    use ApiResponse;
 
-    public function verifyVerificationCode(Request $request)
+    public function verifyVerificationCode(VerifyVerificationCodeRequest  $request)
     {
         // Validate the request data
         $validator = Validator::make($request->all(), [
@@ -46,7 +48,7 @@ class UserResetPassword extends Controller
         return $this->error('Invalid verification code', 422);
     }
 
-    public function resetPassword(Request $request)
+    public function resetPassword(ResetPasswordRequest  $request)
     {
         // Validate the request data
         $validator = Validator::make($request->all(), [
