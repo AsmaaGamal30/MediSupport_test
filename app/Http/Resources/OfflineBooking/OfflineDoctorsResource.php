@@ -19,10 +19,10 @@ class OfflineDoctorsResource extends JsonResource
             'id' => $this->id,
             'first_name' =>  $this->first_name,
             'last_name' => $this->last_name,
-            'photo' => $this->photo,
+            'Avatar' => $this->avatar,
             'clinic_location' => $this->clinic_location,
             'working_hours' => $this->working_hours,
-            'rate' =>  $this->rates->avg('rate'),
+            'rate' =>  number_format($this->rates->avg('rate'),1),
 
         ];
     }

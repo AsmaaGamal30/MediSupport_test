@@ -7,7 +7,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 trait FailedValidationResponse
 {
     use ApiResponse;
-    public function failedValidationResponse($validator)
+    private function failedValidationResponse($validator)
     {
         throw new HttpResponseException(
             $this->apiResponse(
@@ -17,5 +17,9 @@ trait FailedValidationResponse
                 error: true
             )
         );
+    }
+    protected function failedValidation( $validator)
+    {
+        $this->failedValidationResponse($validator);
     }
 }

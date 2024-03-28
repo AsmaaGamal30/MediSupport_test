@@ -5,7 +5,7 @@ namespace App\Http\Requests\OfflineBookingRequests;
 use Illuminate\Foundation\Http\FormRequest;
 
 use App\Traits\FailedValidationResponse;
-use Illuminate\Contracts\Validation\Validator;
+
 
 class BookingRequest extends FormRequest
 {
@@ -31,8 +31,5 @@ class BookingRequest extends FormRequest
             'date_id' => 'required|exists:dates,id'
         ];
     }
-    protected function failedValidation(Validator $validator)
-    {
-        $this->failedValidationResponse($validator);
-    }
+  
 }

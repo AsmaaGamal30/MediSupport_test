@@ -3,7 +3,6 @@
 namespace App\Http\Requests\OfflineBookingRequests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
 use App\Traits\FailedValidationResponse;
 
 class DoctorIdRequest extends FormRequest
@@ -29,8 +28,5 @@ class DoctorIdRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(Validator $validator)
-    {
-        $this->failedValidationResponse($validator);
-    }
+
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\OfflineBooking;
+namespace App\Http\Controllers\OfflineBooking\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OfflineBookingRequests\BookingIdRequest;
@@ -37,7 +37,7 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve doctor details', 500);
         }
-    }
+    }//end getDoctorDetails
 
     public function getDoctorDateTimes(DateIdRequest $request)
     {
@@ -60,7 +60,7 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve available times', 500);
         }
-    }
+    }//end getDoctorDateTimes
 
     public function BookAppointment(BookingRequest $request)
     {
@@ -127,7 +127,7 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to book appointment', 500);
         }
-    }
+    }//end BookAppointment
 
     public function selectUserBooking()
     {
@@ -150,7 +150,7 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve user bookings', 500);
         }
-    }
+    }//end selectUserBooking
 
 
     public function deleteBooking(BookingIdRequest $request)
@@ -169,7 +169,7 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to delete booking', 500);
         }
-    }
+    }//end deleteBooking
 
 
 }

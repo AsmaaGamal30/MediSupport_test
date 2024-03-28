@@ -16,6 +16,7 @@ class BloodSugarHistoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'user_id'=>$this->user->id,
             'advice' => $this->bloodSugarAdvice->key,
             'level' => $this->level,
             'created_at' => $this->created_at->format('Y-m-d'),
