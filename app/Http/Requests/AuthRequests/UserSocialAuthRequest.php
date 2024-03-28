@@ -29,8 +29,4 @@ class UserSocialAuthRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(Validator $validator)
-    {
-        $this->failedValidationResponse($validator);
-    }
 }

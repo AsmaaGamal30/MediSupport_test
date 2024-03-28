@@ -4,7 +4,6 @@ namespace App\Http\Requests\HealthMatrixRequests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\FailedValidationResponse;
-use Illuminate\Contracts\Validation\Validator;
 
 class BloodSugarRequest extends FormRequest
 {
@@ -30,8 +29,5 @@ class BloodSugarRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(Validator $validator)
-    {
-        $this->failedValidation($validator);
-    }
+
 }

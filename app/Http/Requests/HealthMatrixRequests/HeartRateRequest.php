@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\OfflineBookingRequests;
+namespace App\Http\Requests\HealthMatrixRequests;
 
-use App\Traits\FailedValidationResponse;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Traits\FailedValidationResponse;
 
-class PageRequest extends FormRequest
+class HeartRateRequest extends FormRequest
 {
     use FailedValidationResponse;
     /**
@@ -24,9 +24,7 @@ class PageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'page' => 'required|numeric',
+            'heart_rate' => 'required|numeric',
         ];
     }
-
-
 }

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\BloodSugar;
+namespace App\Http\Resources\HeartRate;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class LastBloodSugarResource extends JsonResource
+class HeartRateAdviceResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,8 +16,8 @@ class LastBloodSugarResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'advice' => $this->bloodSugarAdvice->key,
-            'level' => $this->level,
+            'key' => $this->key,
+            'advice' => $this->advice,
         ];
     }
 }

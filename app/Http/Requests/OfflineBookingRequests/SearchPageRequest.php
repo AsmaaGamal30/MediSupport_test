@@ -3,7 +3,6 @@
 namespace App\Http\Requests\OfflineBookingRequests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
 use App\Traits\FailedValidationResponse;
 
 class SearchPageRequest extends FormRequest
@@ -30,8 +29,4 @@ class SearchPageRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(Validator $validator)
-    {
-        $this->failedValidationResponse($validator);
-    }
 }

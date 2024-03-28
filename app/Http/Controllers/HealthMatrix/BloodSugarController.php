@@ -114,7 +114,7 @@ class BloodSugarController extends Controller
                 ->take(7)
                 ->get();
 
-            $data = BloodSugarResource::collection($bloodSugarRecords);
+            $data = BloodSugarHistoryResource::collection($bloodSugarRecords);
 
             return $this->apiResponse(
                 data: $data,
@@ -129,14 +129,14 @@ class BloodSugarController extends Controller
 
     public function getLastBloodSugarRecord()
     {
-        try {
+         try {
             $userAuthId = auth()->guard('user')->user()->id;
 
             $lastBloodSugar = BloodSugar::where('user_id', $userAuthId)
                 ->latest()
                 ->first();
 
-            $data = new LastBloodSugarResource($lastBloodSugar);
+            $data = new BloodSugarResource($lastBloodSugar);
 
             return $this->apiResponse(
                 data: $data,

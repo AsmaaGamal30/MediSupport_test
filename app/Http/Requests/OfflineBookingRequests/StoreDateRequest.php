@@ -1,11 +1,10 @@
 <?php
 
 namespace App\Http\Requests\OfflineBookingRequests;
-
-use App\Traits\FailedValidationResponse;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Traits\FailedValidationResponse;
 
-class PageRequest extends FormRequest
+class StoreDateRequest extends FormRequest
 {
     use FailedValidationResponse;
     /**
@@ -24,9 +23,7 @@ class PageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'page' => 'required|numeric',
+            'date' => 'required|date|unique:dates|after_or_equal:today',
         ];
     }
-
-
 }

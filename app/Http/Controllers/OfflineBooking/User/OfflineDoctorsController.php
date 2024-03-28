@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\OfflineBooking;
+namespace App\Http\Controllers\OfflineBooking\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OfflineBookingRequests\PageRequest;
@@ -43,7 +43,7 @@ class OfflineDoctorsController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to select doctors', 500);
         }
-    }
+    } //end selectTopDoctorsByRating
 
     public function selectDoctors()
     {
@@ -64,7 +64,7 @@ class OfflineDoctorsController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to select doctors', 500);
         }
-    }
+    }//end selectDoctors
    
     public function searchDoctors(SearchPageRequest $request)
     {
@@ -100,5 +100,5 @@ class OfflineDoctorsController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to search doctors', 500);
         }
-    }
+    }//end searchDoctors
 }

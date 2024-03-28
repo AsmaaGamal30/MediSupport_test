@@ -4,14 +4,13 @@ use App\Http\Controllers\Article\ArticleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
-use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController};
+use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController, HeartRateController};
 use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword, DoctorForgotPassword, DoctorResetPassword};
 use App\Http\Controllers\Rating\{RatingController};
 use App\Http\Controllers\contact\{ContactController};
-use App\Http\Controllers\OfflineBooking\BookingController;
+use App\Http\Controllers\OfflineBooking\User\{BookingController,OfflineDoctorsController};
 use App\Http\Controllers\Chat\MessagesController;
-
-use App\Http\Controllers\OfflineBooking\OfflineDoctorsController;
+use App\Http\Controllers\OfflineBooking\Doctor\DoctorOfflineBookingController;
 
 //admin auth
 Route::controller(AdminAuthController::class)->prefix('auth/admin')->group(
@@ -175,6 +174,16 @@ Route::controller(BloodSugarController::class)->middleware(['custom-auth:' . 'us
     Route::get('/get-all-status', 'getAllBloodSugarStatus');
 });
 
+//user heart rate
+Route::controller(HeartRateController::class)->middleware(['custom-auth:' . 'user'])->prefix('user/heart-rate')->group(function () {
+    Route::post('/store', 'storeHeartRate');
+    Route::get('/get-all-records', 'getAllHeartRateRecords');
+    Route::get('/get-last-three-records', 'getLastThreeHeartRateRecords');
+    Route::get('/get-last-seven-records', 'getLastSevenHeartRateRecords');
+    Route::get('/get-last-record', 'getLastHeartRateRecord');
+    Route::get('/get-recommended-advice', 'getUserRecommendedAdvice');
+});
+
 //Rating
 Route::controller(RatingController::class)->prefix('auth/user')->group(function () {
     Route::post('/ratings', 'store');
@@ -191,6 +200,7 @@ Route::controller(OfflineDoctorsController::class)->middleware(['custom-auth:' .
     Route::get('/search-doctors', 'searchDoctors');
 });
 
+//user offline booking
 Route::controller(BookingController::class)->middleware(['custom-auth:' . 'user'])->prefix('user/booking')->group(function () {
     Route::get('/get-doctor-details', 'getDoctorDetails');
     Route::get('/get-times', 'getDoctorDateTimes');
@@ -207,3 +217,10 @@ Route::get('/articles/{id}', [ArticleController::class, 'show'])->middleware(['a
 Route::post('/articles', [ArticleController::class, 'store'])->middleware('auth:doctor');
 Route::put('/articles/{id}', [ArticleController::class, 'update'])->middleware('auth:doctor');
 Route::delete('articles/{article}', [ArticleController::class, 'destroy'])->middleware('auth:doctor,admin');
+
+//doctor offline booking
+Route::controller(DoctorOfflineBookingController::class)->middleware(['custom-auth:' . 'doctor'])->prefix('doctor')->group(function () {
+    Route::post('/store-date', 'storeDate');
+    Route::post('/store-time', 'storeTime');
+    Route::get('/all-booking', 'getAllOfflineBooking');
+});

@@ -23,7 +23,8 @@ class DatabaseSeeder extends Seeder
             PressureAdviceSeeder::class,
             BMIAdviceSeeder::class,
             BloodSugarAdviceSeeder::class,
-            BloodSugarStatusSeeder::class
+            BloodSugarStatusSeeder::class,
+            HeartRateAdviceSeeder::class
         ]);
     }
 }
