@@ -3,18 +3,23 @@
 namespace App\Http\Resources\Doctor;
 
 use Illuminate\Http\Request;
+use App\Traits\AverageRatingTrait;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Controllers\Rating\RatingController;
 
 class DoctorResource extends JsonResource
 {
+    use AverageRatingTrait;
+
     /**
      * Transform the resource into an array.
      *
-     * @return array<string, mixed>
+     * @param  Request  $request
+     * @return array
      */
-    public function toArray(Request $request): array
+    public function toArray($request)
     {
+        $averageRating = $this->calculateAverageRating($this->rates);
+
         return [
             'admin_id' => $this->admin_id,
             'first_name' => $this->first_name,
@@ -26,8 +31,27 @@ class DoctorResource extends JsonResource
             'bio' => $this->bio,
             'price' => $this->price,
             'clinic_location' => $this->clinic_location,
-            'rate' =>  $this->rates->avg('rate'),
-            'active_status' =>$this->active_status,
+            'active_status' => $this->active_status,
+            'average_rating' => $averageRating,
         ];
+    }
+
+    /**
+     * Calculate the average rating of the doctor.
+     *
+     * @return float|null
+     */
+    private function calculateAverageRating(): ?float
+    {
+        $ratings = $this->rates;
+
+        if ($ratings->isEmpty()) {
+            return null;
+        }
+
+        $totalRating = $ratings->sum('rate');
+        $ratingsCount = $ratings->count();
+
+        return round($totalRating / $ratingsCount, 1);
     }
 }
