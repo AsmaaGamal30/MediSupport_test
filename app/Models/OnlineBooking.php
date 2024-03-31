@@ -20,4 +20,9 @@ class OnlineBooking extends Model
     {
         return $this->belongsTo(Doctor::class);
     }
+
+    public function doctorCash()
+    {
+        return $this->hasOne(DoctorCash::class);
+    }
 }

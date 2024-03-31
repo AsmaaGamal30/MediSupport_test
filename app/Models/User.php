@@ -19,7 +19,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'first_name',
+        'name',
         'last_name',
         'email',
         'password',
@@ -95,7 +95,12 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function notifications()
-{
-return $this->morphMany(DatabaseNotification::class, 'notifiable')->orderBy('created_at', 'desc');
-}
+    {
+        return $this->morphMany(DatabaseNotification::class, 'notifiable')->orderBy('created_at', 'desc');
+    }
+
+    public function doctorCashes()
+    {
+        return $this->hasMany(DoctorCash::class);
+    }
 }

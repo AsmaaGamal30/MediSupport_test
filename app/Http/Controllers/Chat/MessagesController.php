@@ -244,8 +244,8 @@ class MessagesController extends Controller
                 $q->where('ch_messages.from_id', auth()->guard('doctor')->user()->id)
                     ->orWhere('ch_messages.to_id', auth()->guard('doctor')->user()->id);
             })
-            ->select('users.id', 'users.first_name', 'users.last_name', 'users.email', 'users.created_at', 'users.updated_at', 'users.active_status', 'users.avatar', DB::raw('MAX(ch_messages.created_at) AS max_created_at'))
-            ->groupBy('users.id', 'users.first_name', 'users.last_name', 'users.email', 'users.created_at', 'users.updated_at', 'users.active_status', 'users.avatar')
+            ->select('users.id', 'users.name', 'users.last_name', 'users.email', 'users.created_at', 'users.updated_at', 'users.active_status', 'users.avatar', DB::raw('MAX(ch_messages.created_at) AS max_created_at'))
+            ->groupBy('users.id', 'users.name', 'users.last_name', 'users.email', 'users.created_at', 'users.updated_at', 'users.active_status', 'users.avatar')
             ->orderBy('max_created_at', 'desc')
             ->paginate($request->per_page ?? $this->perPage);
 

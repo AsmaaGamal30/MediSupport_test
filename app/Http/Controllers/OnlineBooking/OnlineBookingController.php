@@ -61,7 +61,7 @@ class OnlineBookingController extends Controller
 
         $formattedBookings = $bookings->map(function ($booking) {
             return [
-                'username' => $booking->user->first_name . ' ' . $booking->user->last_name,
+                'username' => $booking->user->name . ' ' . $booking->user->last_name,
                 'doctor_name' => $booking->doctor->first_name . ' ' . $booking->doctor->last_name,
                 'status' => $booking->status,
             ];
