@@ -16,18 +16,18 @@ class UserSocialAuthResource extends JsonResource
     {
         if ($this->provider_name == 'facebook') {
             return [
-                'first_name' => $this->first_name,
+                'first_name' => $this->name,
                 'email' => $this->email,
-                'provider_name'=>$this->provider_name 
+                'provider_name' => $this->provider_name
             ];
         }
 
         if ($this->provider_name == 'google') {
             return [
-                'first_name' => $this->first_name,
+                'first_name' => $this->name,
                 'last_name' => $this->last_name,
                 'email' => $this->email,
-                'provider_name'=>$this->provider_name 
+                'provider_name' => $this->provider_name
             ];
         }
     }

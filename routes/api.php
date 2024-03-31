@@ -11,11 +11,12 @@ use App\Http\Controllers\OnlineBooking\OnlineDoctorController;
 use App\Http\Controllers\OnlineBooking\OnlineBookingController;
 use App\Http\Controllers\Notifications\UserNotificationController;
 use App\Http\Controllers\Notifications\DoctorNotificationController;
-use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword, };
+use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword,};
 use App\Http\Controllers\OfflineBooking\Doctor\DoctorOfflineBookingController;
 use App\Http\Controllers\OfflineBooking\User\{BookingController, OfflineDoctorsController};
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
 use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController, HeartRateController};
+use App\Http\Controllers\OnlineBooking\PaymentController;
 
 //admin auth
 Route::controller(AdminAuthController::class)->prefix('auth/admin')->group(
@@ -224,7 +225,7 @@ Route::controller(DoctorOfflineBookingController::class)->middleware(['custom-au
 
 //get all doctors for admin
 Route::get('all-doctors', [DoctorController::class, 'index'])->middleware('auth:admin');
-//delete doctor 
+//delete doctor
 Route::delete('/doctors/{id}', [DoctorController::class, 'deleteDoctor'])->middleware('auth:admin');
 //count doctor
 Route::get('/doctors/count', [DoctorController::class, 'getDoctorCount'])->middleware('auth:admin');
@@ -244,18 +245,18 @@ Route::get('/all-contact', [ContactController::class, 'index'])->middleware('aut
 //get first eight contact for admin
 Route::get('/contacts/first-eight', [ContactController::class, 'getFirstEightContacts'])->middleware('auth:admin');
 
-//user online booking 
+//user online booking
 Route::prefix('auth/user')->group(function () {
     Route::post('/online-bookings', [OnlineBookingController::class, 'store']);
     Route::get('/all-bookings', [OnlineBookingController::class, 'getUserBookings']);
 });
+
 
 //user notifications
 Route::prefix('auth/user')->group(function () {
     Route::get('/notifications', [UserNotificationController::class, 'index']);
     Route::put('/notifications/{id}', [UserNotificationController::class, 'update']);
     Route::post('/notifications/mark-all-read', [UserNotificationController::class, 'markAsRead']);
-
 });
 
 //online doctors
@@ -269,7 +270,6 @@ Route::prefix('auth/user')->group(function () {
 Route::prefix('auth/doctor')->group(function () {
     Route::post('/bookings-accept', [OnlineDoctorController::class, 'acceptBooking']);
     Route::get('/all-bookings', [OnlineDoctorController::class, 'getDoctorBookings']);
-
 });
 
 
@@ -278,5 +278,6 @@ Route::prefix('auth/doctor')->group(function () {
     Route::get('/notifications', [DoctorNotificationController::class, 'index']);
     Route::put('/notifications/{id}', [DoctorNotificationController::class, 'update']);
     Route::post('/notifications/mark-all-read', [DoctorNotificationController::class, 'markAsRead']);
-
 });
+
+Route::get('/user/online-booking/payment/{bookingId}', [PaymentController::class, 'makePayment'])->middleware('auth:user');

@@ -26,8 +26,8 @@ class OnlineDoctorController extends Controller
         }
 
         $onlineDoctors = Doctor::where('active_status', 1)
-                               ->with('rates')
-                               ->get();
+            ->with('rates')
+            ->get();
 
         if ($onlineDoctors->isEmpty()) {
             return $this->success('There are no online doctors currently.');
@@ -49,8 +49,8 @@ class OnlineDoctorController extends Controller
         }
 
         $onlineDoctors = Doctor::where('active_status', 1)
-                               ->with('rates')
-                               ->get();
+            ->with('rates')
+            ->get();
 
         if ($onlineDoctors->isEmpty()) {
             return $this->success('There are no online doctors currently.');
@@ -68,29 +68,29 @@ class OnlineDoctorController extends Controller
     }
 
     public function getOnlineDoctorById($doctorId)
-{
-    if (!Auth::guard('user')->check()) {
-        return $this->error('Unauthenticated', 401);
+    {
+        if (!Auth::guard('user')->check()) {
+            return $this->error('Unauthenticated', 401);
+        }
+
+        $validator = Validator::make(['doctor_id' => $doctorId], [
+            'doctor_id' => 'required|exists:doctors,id',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->error($validator->errors()->first(), 422);
+        }
+
+        $onlineDoctor = Doctor::where('id', $doctorId)
+            ->where('active_status', 1)
+            ->first();
+
+        if (!$onlineDoctor) {
+            return $this->error('Doctor not found or not currently online.', 404);
+        }
+
+        return $this->successData('Online doctor retrieved successfully', new DoctorResource($onlineDoctor));
     }
-
-    $validator = Validator::make(['doctor_id' => $doctorId], [
-        'doctor_id' => 'required|exists:doctors,id',
-    ]);
-
-    if ($validator->fails()) {
-        return $this->error($validator->errors()->first(), 422);
-    }
-
-    $onlineDoctor = Doctor::where('id', $doctorId)
-        ->where('active_status', 1)
-        ->first();
-
-    if (!$onlineDoctor) {
-        return $this->error('Doctor not found or not currently online.', 404);
-    }
-
-    return $this->successData('Online doctor retrieved successfully', new DoctorResource($onlineDoctor));
-}
     public function acceptBooking(AcceptBookingRequest  $request)
     {
         if (!Auth::guard('doctor')->check()) {
@@ -141,7 +141,7 @@ class OnlineDoctorController extends Controller
 
         $formattedBookings = $bookings->map(function ($booking) {
             return [
-                'username' => $booking->user->first_name . ' ' . $booking->user->last_name,
+                'username' => $booking->user->name . ' ' . $booking->user->last_name,
                 'doctor_name' => $booking->doctor->first_name . ' ' . $booking->doctor->last_name,
                 'status' => $booking->status,
             ];

@@ -16,11 +16,11 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'first_name' => $this->first_name,
+            'first_name' => $this->name,
             'last_name' => $this->last_name,
             'email' => $this->email,
             'photo' => $this->photo,
-            'active_status' =>$this->active_status,
+            'active_status' => $this->active_status,
         ];
     }
 }

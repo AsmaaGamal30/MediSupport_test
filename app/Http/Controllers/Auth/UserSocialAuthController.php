@@ -18,13 +18,13 @@ class UserSocialAuthController extends Controller
 {
     use ApiResponse;
 
-     // Redirect the user to the OAuth provider's authentication page.
-     public function redirect($provider)
-     {
-       return Socialite::driver($provider)->stateless()->redirect();
-     } //end redirect 
+    // Redirect the user to the OAuth provider's authentication page.
+    public function redirect($provider)
+    {
+        return Socialite::driver($provider)->stateless()->redirect();
+    } //end redirect
 
-     // function to retrieve the user information and access token for test
+    // function to retrieve the user information and access token for test
     public function Callback($provider)
     {
         $user = Socialite::driver($provider)->stateless()->user();
@@ -43,7 +43,7 @@ class UserSocialAuthController extends Controller
             $socialiteUser = Socialite::driver($provider)->stateless()->userFromToken($accessProviderToken);
         } catch (\Exception $e) {
             return $this->error(
-              message: 'Invalid provider or token',
+                message: 'Invalid provider or token',
             );
         }
 
@@ -70,7 +70,7 @@ class UserSocialAuthController extends Controller
         else {
             $newUser = User::create([
                 'email' => $socialiteUser->email,
-                'first_name' => $provider == 'google' ? $socialiteUser->user['given_name'] : $socialiteUser->user['name'],
+                'name' => $provider == 'google' ? $socialiteUser->user['given_name'] : $socialiteUser->user['name'],
                 'last_name' => $provider == 'google' ? $socialiteUser->user['family_name'] : '',
                 'avatar' => $socialiteUser->avatar,
                 'provider_id' => $socialiteUser->id,
@@ -94,5 +94,5 @@ class UserSocialAuthController extends Controller
             statuscode: 200,
             error: false
         );
-    }// end handleProviderCallback
+    } // end handleProviderCallback
 }

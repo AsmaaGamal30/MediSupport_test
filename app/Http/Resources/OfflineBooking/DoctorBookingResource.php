@@ -15,13 +15,13 @@ class DoctorBookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'booking_id'=> $this->id,
-            'user_id'=> $this->user->id,
-            'first_name' =>  $this->user->first_name,
+            'booking_id' => $this->id,
+            'user_id' => $this->user->id,
+            'first_name' =>  $this->user->name,
             'last_name' =>  $this->user->last_name,
-            'time' => $this->time->time, 
+            'time' => $this->time->time,
             'date' => $this->date->date,
             'created_at' => $this->created_at
-       ];
+        ];
     }
 }
