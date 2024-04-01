@@ -131,9 +131,10 @@ class MessagesController extends Controller
         // if there is attachment [file]
         if ($request->hasFile('file')) {
             // allowed extensions
+            $allowed_audio = $this->chatifyMessenger->getAllowedAudio();
             $allowed_images = $this->chatifyMessenger->getAllowedImages();
             $allowed_files  = $this->chatifyMessenger->getAllowedFiles();
-            $allowed        = array_merge($allowed_images, $allowed_files);
+            $allowed        = array_merge($allowed_images, $allowed_files, $allowed_audio);
 
             $file = $request->file('file');
             // check file size

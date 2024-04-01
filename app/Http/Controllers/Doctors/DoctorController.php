@@ -1,10 +1,9 @@
 <?php
 
-// App/Http/Controllers/Doctors/DoctorController.php
-
 namespace App\Http\Controllers\Doctors;
 
 use App\Models\Doctor;
+use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -14,6 +13,12 @@ use App\Http\Resources\Doctor\DoctorResource;
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\AuthRequests\UpdateDoctorRequest;
 use App\Http\Requests\AuthRequests\UpdateDocrorsPasswordRequest;
+use App\Models\BloodPressure;
+use App\Models\BloodSugar;
+use App\Models\BMI;
+use App\Models\Booking;
+use App\Models\HeartRate;
+use App\Models\OnlineBooking;
 
 class DoctorController extends Controller
 {
@@ -95,30 +100,96 @@ class DoctorController extends Controller
         return DoctorResource::collection($doctors);
     }
     public function updateDoctor(UpdateDoctorRequest $request, $id)
-{
-    try {
-        // Ensure the user is authenticated as a doctor
-        if (!Auth::guard('doctor')->check()) {
-            return $this->error('Unauthenticated', 401);
+    {
+        try {
+            // Ensure the user is authenticated as a doctor
+            if (!Auth::guard('doctor')->check()) {
+                return $this->error('Unauthenticated', 401);
+            }
+
+            // Find the doctor by ID
+            $doctor = Doctor::find($id);
+
+            // Check if the doctor exists
+            if (!$doctor) {
+                return $this->error('Doctor not found', 404);
+            }
+
+            // Update the doctor's data based on the validated request
+            $doctor->update($request->validated());
+
+            // Return success response
+            return $this->success('Doctor updated successfully');
+        } catch (\Exception $e) {
+            // Return error response if an exception occurs
+            return $this->error($e->getMessage(), 500); // Internal Server Error
         }
-
-        // Find the doctor by ID
-        $doctor = Doctor::find($id);
-
-        // Check if the doctor exists
-        if (!$doctor) {
-            return $this->error('Doctor not found', 404);
-        }
-
-        // Update the doctor's data based on the validated request
-        $doctor->update($request->validated());
-
-        // Return success response
-        return $this->success('Doctor updated successfully');
-    } catch (\Exception $e) {
-        // Return error response if an exception occurs
-        return $this->error($e->getMessage(), 500); // Internal Server Error
     }
-}
 
+    public function fetchLatestMedicalData()
+    {
+        $doctorId = auth()->guard('doctor')->id();
+
+        $onlineBookedUsers = OnlineBooking::where('doctor_id', $doctorId)
+            ->where('status', 'accepted')
+            ->pluck('user_id');
+        $offlineBookedUsers = Booking::where('doctor_id', $doctorId)->pluck('user_id');
+
+        $bookedUserIds = $onlineBookedUsers->merge($offlineBookedUsers)->unique();
+
+        $latestMedicalData = [];
+
+        foreach ($bookedUserIds as $userId) {
+            $user = User::findOrFail($userId);
+
+            $latestData = [
+                'user_id' => $userId,
+                'user_name' => $user->name . ' ' . $user->last_name,
+                'email' => $user->email,
+                'blood_sugar_level' => optional($user->bloodSugars->last())->level,
+                'bmi_result' => optional($user->BMIs->last())->result,
+                'heart_rate' => optional($user->heartRates->last())->heart_rate,
+                'systolic' => optional($user->bloodPressures->last())->systolic,
+                'diastolic' => optional($user->bloodPressures->last())->diastolic,
+            ];
+            $latestMedicalData[] = $latestData;
+        }
+
+        return $this->sendData('Latest medical data for all users who booked the doctor', $latestMedicalData);
+    }
+
+    public function fetchMedicalData($userId)
+    {
+        $doctorId = auth()->guard('doctor')->id();
+
+        $isBooked = OnlineBooking::where('doctor_id', $doctorId)
+            ->where('status', 'accepted')
+            ->where('user_id', $userId)
+            ->exists();
+
+        if (!$isBooked) {
+            $isBooked = Booking::where('doctor_id', $doctorId)
+                ->where('user_id', $userId)
+                ->exists();
+        }
+
+        if (!$isBooked) {
+            return $this->error('User has not booked the doctor', 404);
+        }
+
+        $user = User::findOrFail($userId);
+
+        $medicalData = [
+            'user_id' => $userId,
+            'user_name' => $user->name . ' ' . $user->last_name,
+            'email' => $user->email,
+            'blood_sugar_levels' => BloodSugar::where('user_id', $userId)->pluck('level')->toArray(),
+            'bmi_results' => BMI::where('user_id', $userId)->pluck('result')->toArray(),
+            'heart_rates' => HeartRate::where('user_id', $userId)->pluck('heart_rate')->toArray(),
+            'systolic' => BloodPressure::where('user_id', $userId)->pluck('systolic')->toArray(),
+            'diastolic' => BloodPressure::where('user_id', $userId)->pluck('diastolic')->toArray(),
+        ];
+
+        return $this->sendData('User medical data', $medicalData);
+    }
 }
