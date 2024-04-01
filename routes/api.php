@@ -7,6 +7,9 @@ use App\Http\Controllers\Doctors\DoctorController;
 use App\Http\Controllers\Article\ArticleController;
 use App\Http\Controllers\Rating\{RatingController};
 use App\Http\Controllers\contact\{ContactController};
+use App\Http\Controllers\OnlineBooking\PaymentController;
+use App\Http\Controllers\VideoCall\UserVideoCallController;
+use App\Http\Controllers\VideoCall\DoctorVideoCallController;
 use App\Http\Controllers\OnlineBooking\OnlineDoctorController;
 use App\Http\Controllers\OnlineBooking\OnlineBookingController;
 use App\Http\Controllers\Notifications\UserNotificationController;
@@ -16,7 +19,6 @@ use App\Http\Controllers\OfflineBooking\Doctor\DoctorOfflineBookingController;
 use App\Http\Controllers\OfflineBooking\User\{BookingController, OfflineDoctorsController};
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
 use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController, HeartRateController};
-use App\Http\Controllers\OnlineBooking\PaymentController;
 
 //admin auth
 Route::controller(AdminAuthController::class)->prefix('auth/admin')->group(
@@ -281,3 +283,21 @@ Route::prefix('auth/doctor')->group(function () {
 });
 
 Route::get('/user/online-booking/payment/{bookingId}', [PaymentController::class, 'makePayment'])->middleware('auth:user');
+
+
+//doctor video call
+Route::prefix('auth/doctor')->group(function () {
+    Route::post('/video-call/token', [DoctorVideoCallController::class, 'generateToken']);
+    Route::post('/video-call/start', [DoctorVideoCallController::class, 'startCall']);
+    Route::post('/video-call/end', [DoctorVideoCallController::class, 'endCall']);
+    Route::post('/call/accept', [DoctorVideoCallController::class, 'acceptCall']);
+});
+
+
+//user video call
+Route::prefix('auth/user')->group(function () {
+    Route::post('/video-call/token', [UserVideoCallController::class, 'generateToken']);
+    Route::post('/video-call/start', [UserVideoCallController::class, 'startCall']);
+    Route::post('/video-call/end', [UserVideoCallController::class, 'endCall']);
+    Route::post('/call/accept', [UserVideoCallController::class, 'acceptCall']);
+});
