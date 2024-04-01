@@ -103,4 +103,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(DoctorCash::class);
     }
+
+    public function videoCalls()
+{
+    return $this->hasMany(VideoCall::class, 'user_id');
+}
 }

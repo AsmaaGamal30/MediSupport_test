@@ -113,4 +113,16 @@ class Doctor extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(DoctorCash::class);
     }
+
+    public function videoCalls()
+    {
+        return $this->hasMany(VideoCall::class, 'doctor_id');
+    }
+    public function activeVideoCall()
+    {
+        return $this->hasOne(VideoCall::class)
+            ->where('status', 'accepted')
+            ->whereNull('ended_at');
+    }
+
 }
