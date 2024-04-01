@@ -24,7 +24,7 @@ class StoreTimeRequest extends FormRequest
     {
         return [
             'time' => 'required',
-             'date_id' =>'required|numeric|exists:dates,id|after_or_equal:today',
+            'date_id' =>'required|numeric|exists:dates,id',
         ];
     }
 }

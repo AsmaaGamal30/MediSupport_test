@@ -10,6 +10,7 @@ use App\Models\Booking;
 use App\Models\Date;
 use App\Models\Time;
 use App\Traits\ApiResponse;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DoctorOfflineBookingController extends Controller
@@ -30,7 +31,7 @@ class DoctorOfflineBookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to store date', 500);
         }
-    }//end storeDate
+    } //end storeDate
 
     public function storeTime(StoreTimeRequest $request)
     {
@@ -55,6 +56,14 @@ class DoctorOfflineBookingController extends Controller
                 return $this->error('This time already exists for the selected date.', 422);
             }
 
+            // Check if the date associated with date_id is greater than or equal to the current date
+            $selectedDate = Carbon::parse($date->date);
+            $currentDate = Carbon::now();
+
+            if ($selectedDate->lt($currentDate)) {
+                return $this->error('The selected date must be greater than or equal to the current date.', 422);
+            }
+            
             Time::create([
                 'doctor_id' => $doctorId,
                 'time' => $request->time,
@@ -65,7 +74,7 @@ class DoctorOfflineBookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to store time', 500);
         }
-    }//end storeTime
+    } //end storeTime
 
     public function getAllOfflineBooking()
     {
@@ -88,5 +97,5 @@ class DoctorOfflineBookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve doctor bookings', 500);
         }
-    }//end getAllOfflineBooking
+    } //end getAllOfflineBooking
 }
