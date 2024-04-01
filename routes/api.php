@@ -7,7 +7,6 @@ use App\Http\Controllers\Doctors\DoctorController;
 use App\Http\Controllers\Article\ArticleController;
 use App\Http\Controllers\Rating\{RatingController};
 use App\Http\Controllers\contact\{ContactController};
-use App\Http\Controllers\OnlineBooking\PaymentController;
 use App\Http\Controllers\VideoCall\UserVideoCallController;
 use App\Http\Controllers\VideoCall\DoctorVideoCallController;
 use App\Http\Controllers\OnlineBooking\OnlineDoctorController;
@@ -19,6 +18,9 @@ use App\Http\Controllers\OfflineBooking\Doctor\DoctorOfflineBookingController;
 use App\Http\Controllers\OfflineBooking\User\{BookingController, OfflineDoctorsController};
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
 use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController, HeartRateController};
+use App\Http\Controllers\OnlineBooking\HandleStripeWebhooksController;
+use App\Http\Controllers\OnlineBooking\PaymentController;
+use App\Http\Controllers\Users\UserController;
 
 //admin auth
 Route::controller(AdminAuthController::class)->prefix('auth/admin')->group(
@@ -282,7 +284,9 @@ Route::prefix('auth/doctor')->group(function () {
     Route::post('/notifications/mark-all-read', [DoctorNotificationController::class, 'markAsRead']);
 });
 
+//user payment
 Route::get('/user/online-booking/payment/{bookingId}', [PaymentController::class, 'makePayment'])->middleware('auth:user');
+Route::post('/stripe/webhook', [HandleStripeWebhooksController::class, 'handleWebhook']);
 
 
 //doctor video call
@@ -301,3 +305,15 @@ Route::prefix('auth/user')->group(function () {
     Route::post('/video-call/end', [UserVideoCallController::class, 'endCall']);
     Route::post('/call/accept', [UserVideoCallController::class, 'acceptCall']);
 });
+
+//fetch users medical data
+
+Route::prefix('auth/doctor')->middleware('auth:doctor')->group(function () {
+    Route::get('/fetchLatestMedicalData', [DoctorController::class, 'fetchLatestMedicalData']);
+    Route::get('/fetchMedicalData/{userId}', [DoctorController::class, 'fetchMedicalData']);
+});
+
+//users data for admin panel
+Route::get('all-users', [UserController::class, 'index'])->middleware('auth:admin');
+Route::get('/user/count', [UserController::class, 'getUsersCount'])->middleware('auth:admin');
+Route::get('/users/first-eight', [UserController::class, 'getFirstEightUsers'])->middleware('auth:admin');

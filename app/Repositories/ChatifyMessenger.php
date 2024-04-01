@@ -52,6 +52,11 @@ class ChatifyMessenger
         return ['png', 'jpg', 'jpeg', 'gif'];
     }
 
+    public function getAllowedAudio()
+    {
+        return ['mp3', 'ogg', 'wav'];
+    }
+
     /**
      * This method returns the allowed file extensions
      * to attach with the message.

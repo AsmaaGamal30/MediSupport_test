@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('doctor_cashes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
             $table->foreignId('online_booking_id')->constrained()->cascadeOnDelete();
             $table->decimal('total');

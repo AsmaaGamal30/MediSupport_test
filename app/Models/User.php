@@ -69,10 +69,22 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
+
+    public function bloodSugars()
+    {
+        return $this->hasMany(BloodSugar::class);
+    }
+
+    public function BMIs()
+    {
+        return $this->hasMany(BMI::class);
+    }
+
     public function bloodPressures()
     {
         return $this->hasMany(BloodPressure::class);
     }
+
 
     public function heartRates(): HasMany
     {
@@ -105,7 +117,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function videoCalls()
-{
-    return $this->hasMany(VideoCall::class, 'user_id');
-}
+    {
+        return $this->hasMany(VideoCall::class, 'user_id');
+    }
 }
