@@ -285,7 +285,7 @@ Route::prefix('auth/doctor')->group(function () {
 });
 
 //user payment
-Route::get('/user/online-booking/payment/{bookingId}', [PaymentController::class, 'makePayment'])->middleware('auth:user');
+Route::post('/user/online-booking/payment/{bookingId}', [PaymentController::class, 'makePayment'])->middleware('auth:user');
 Route::post('/stripe/webhook', [HandleStripeWebhooksController::class, 'handleWebhook']);
 
 
