@@ -334,7 +334,7 @@ class ChatifyMessenger
                     $attachment = json_decode($msg->attachment);
                     // determine the type of the attachment
                     in_array(pathinfo($attachment->new_name, PATHINFO_EXTENSION), $this->getAllowedImages())
-                        ? array_push($images, $attachment->new_name) : '';
+                        ? array_push($images, asset('attachments' . '/' . $attachment->new_name)) : '';
                 }
             }
         }
