@@ -54,13 +54,17 @@ class DoctorAuthController extends Controller
         if ($validator->fails()) {
             return $this->error($validator->errors()->toJson(), 400);
         }
+        $avatarUrl =  $request->file('avatar')->storeAs('avatar',  $request->file('avatar')->getClientOriginalName(), 'public');
+
         $doctor = Doctor::create(array_merge(
             $request->validated(),
             [
                 'password' => bcrypt($request->password),
-                'avatar' => $request->file('avatar')->store('doctors')
+                'avatar' => $avatarUrl
             ]
         ));
+        $avatarUrl = asset('storage' . $avatarUrl);
+
         return $this->success('Doctor successfully registered', 201);
     }
 
