@@ -14,12 +14,13 @@ use Illuminate\Support\Facades\DB;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use Stripe\Customer;
+use Stripe\PaymentMethod;
 
 class PaymentController extends Controller
 {
     use ApiResponse;
 
-    public function makePayment($bookingId)
+    public function makePayment($bookingId, Request $request)
     {
         try {
             $onlineBooking = OnlineBooking::find($bookingId);
@@ -46,6 +47,9 @@ class PaymentController extends Controller
                 $user->stripe_customer_id = $customer->id;
                 $user->save();
             }
+            $paymentMethod = $this->createPaymentMethod($request->token);
+            $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+
 
             // Retrieve the related doctor
             $doctor = $onlineBooking->doctor;
@@ -63,7 +67,13 @@ class PaymentController extends Controller
                 'amount' =>  $booking_price,
                 'currency' => 'usd',
                 'description' => 'Payment for Doctor ' . $doctor->first_name . ' ' . $doctor->last_name . ' booking',
-                'payment_method_types' => ['card'],
+                'payment_method' => $paymentMethod->id,
+                //'confirmation_method' => 'manual', // Use manual confirmation
+                'confirm' => true,
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                    'allow_redirects' => 'never', // Disable redirects
+                ],
                 'statement_descriptor' => 'Booking Payment',
                 'metadata' => [
                     'booking_id' => $onlineBooking->id,
@@ -72,28 +82,13 @@ class PaymentController extends Controller
                 'customer' => $user->stripe_customer_id,
             ]);
 
-            // Uncomment if you want to create DoctorCash and AdminCash records
-            /*
-            DoctorCash::create([
-                'user_id' => auth()->guard('user')->id(),
-                'doctor_id' =>  $doctor->id,
-                'online_booking_id' => $onlineBooking->id,
-                'total' => $doctor_amount
-            ]);
-
-            AdminCash::create([
-                'doctor_id' =>  $doctor->id,
-                'online_booking_id' => $onlineBooking->id,
-                'total' => $admin_amount
-            ]);
-            */
-
             return response()->json([
                 'response' => [
                     'id' =>  $paymentIntent->id,
                     'client_secret' => $paymentIntent->client_secret,
                     'amount' =>  $paymentIntent->amount,
                     'customer' =>  $paymentIntent->customer,
+                    'payment_method' => $paymentIntent->payment_method,
                     'description' =>  $paymentIntent->description,
                     'metadata' =>  $paymentIntent->metadata,
                     'statement_descriptor' => $paymentIntent->statement_descriptor,
@@ -103,5 +98,16 @@ class PaymentController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    private function createPaymentMethod($token)
+    {
+        return PaymentMethod::create([
+            'type' => 'card',
+            'card' => [
+                'token' => $token,
+            ],
+
+        ]);
     }
 }
