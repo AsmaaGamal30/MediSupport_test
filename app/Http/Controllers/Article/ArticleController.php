@@ -41,7 +41,7 @@ class ArticleController extends Controller
             $request->validated(),
             [
                 'doctor_id' => $doctorId,
-                'image' => $request->file('image')->store('images'),
+                'image' => $request->file('image')->store('articles', 'public'),
 
             ]
         ));
@@ -57,21 +57,37 @@ class ArticleController extends Controller
             return $this->error('You are not authorized to update this article.', 403);
         }
 
-        $article->update([
-            'title' => $request->input('title'),
-            'body' => $request->input('body'),
-        ]);
+        // Validate the request data
+        $validatedData = $request->validated();
 
+        // Handle image upload
         if ($request->hasFile('image')) {
-            $oldImagePath = $article->image;
-            $imagePath = $request->file('image')->store('articles');
-            $article->update(['image' => $imagePath]);
-            if ($oldImagePath) {
-                Storage::delete($oldImagePath);
+            // Validate file upload
+            $request->validate([
+                'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Example validation rules, adjust as needed
+            ]);
+
+            // Get the uploaded file
+            $imageFile = $request->file('image');
+
+            // Move the file to the desired directory
+            $imagePath = $imageFile->store('articles', 'public');
+
+            // Delete the old image if it exists
+            if ($article->image) {
+                Storage::disk('public')->delete($article->image);
             }
+
+            // Update the image field in the validated data
+            $validatedData['image'] = $imagePath;
         }
+
+        // Update the article data with the validated data
+        $article->update($validatedData);
+
         return $this->sendData('Article updated successfully.', new ArticleResource($article));
     }
+
 
     public function destroy($id)
     {

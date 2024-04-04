@@ -56,6 +56,8 @@ Route::controller(UserAuthController::class)->prefix('auth/user')->group(
         Route::post('/logout', 'logout');
         Route::post('/refresh', 'refresh');
         Route::get('/user-profile', 'userProfile');
+        Route::post('/update-profile', 'updateUser');
+        Route::delete('/delete-account', 'deleteAccount');
     }
 );
 
@@ -216,7 +218,7 @@ Route::controller(BookingController::class)->middleware(['custom-auth:' . 'user'
 Route::get('/articles', [ArticleController::class, 'index'])->middleware(['auth:user,admin,doctor']);
 Route::get('/articles/{id}', [ArticleController::class, 'show'])->middleware(['auth:user,admin,doctor']);
 Route::post('/articles', [ArticleController::class, 'store'])->middleware('auth:doctor');
-Route::put('/articles/{id}', [ArticleController::class, 'update'])->middleware('auth:doctor');
+Route::post('/articles/{id}', [ArticleController::class, 'update'])->middleware('auth:doctor');
 Route::delete('articles/{article}', [ArticleController::class, 'destroy'])->middleware('auth:doctor,admin');
 
 //doctor offline booking
