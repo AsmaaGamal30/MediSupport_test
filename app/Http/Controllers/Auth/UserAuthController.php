@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AuthRequests\UpdateUserRequest;
 use App\Http\Requests\AuthRequests\UserLoginRequest;
 use App\Http\Requests\AuthRequests\UserRegisterRequest;
 use App\Http\Resources\User\UserResource;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Storage;
 use Validator;
 
 class UserAuthController extends Controller
@@ -54,17 +56,16 @@ class UserAuthController extends Controller
         if ($validator->fails()) {
             return $this->error($validator->errors()->toJson(), 400);
         }
-        $avatarUrl =  $request->file('avatar')->storeAs('avatar',  $request->file('avatar')->getClientOriginalName(), 'public');
 
+        $defaultAvatarPath = 'avatar/avatar.png';
 
         $user = User::create(array_merge(
             $request->validated(),
             [
                 'password' => bcrypt($request->password),
-                'avatar' => $avatarUrl
+                'avatar' => $defaultAvatarPath,
             ]
         ));
-        $avatarUrl = asset('storage' . $avatarUrl);
         return $this->success('User successfully registered', 201);
     }
 
@@ -101,6 +102,62 @@ class UserAuthController extends Controller
     {
         return $this->sendData('', new UserResource(auth()->guard('user')->user()));
     }
+
+    public function updateUser(UpdateUserRequest $request)
+    {
+        try {
+            $user = auth()->guard('user')->user();
+            if (!$user) {
+                return $this->error('Unauthenticated user', 401);
+            }
+
+            // Validate the request data
+            $validatedData = $request->validated();
+
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                // Validate file upload
+                $request->validate([
+                    'avatar' => 'image|mimes:jpeg,png,jpg,gif|max:2048', // Example validation rules, adjust as needed
+                ]);
+
+                // Get the uploaded file
+                $avatarFile = $request->file('avatar');
+
+                // Move the file to the desired directory
+                $avatarPath = $avatarFile->store('avatar', 'public');
+
+                // Delete the old avatar if it exists
+                if ($user->avatar) {
+                    $oldAvatarPath = 'avatar/' . basename($user->avatar);
+                    Storage::disk('public')->delete($oldAvatarPath);
+                }
+
+                // Update the avatar field in the user model with the new path
+                $validatedData['avatar'] = $avatarPath;
+            }
+
+            // Update other user data using the update method
+            $user->update($validatedData);
+
+            return $this->success('User updated successfully');
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500); // Internal Server Error
+        }
+    }
+
+
+
+    public function deleteAccount()
+    {
+        $user = auth()->guard('user')->user();
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+        $user->delete();
+        auth()->guard('user')->logout();
+        return $this->success('User account deleted successfully');
+    }
     /**
      * Get the token array structure.
      *
@@ -113,8 +170,7 @@ class UserAuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-            'user' => auth()->guard('user')->user()
+            'user' => new UserResource(auth()->guard('user')->user())
         ]);
     }
 }
