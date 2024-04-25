@@ -23,7 +23,10 @@ class BloodPressureHistoryResource extends JsonResource
                 'systolic' => $this->systolic,
                 'diastolic' => $this->diastolic,
                 'created_at' => $this->created_at,
+                'day-name' => substr($this->created_at->format('l'), 0, 3),
                 'pressure_advice_key' => $this->pressureAdvice->key,
+                'pressure_advice_advice' => $this->pressureAdvice->advice
+
             ],
         ];
     }

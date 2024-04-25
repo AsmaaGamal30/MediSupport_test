@@ -164,6 +164,8 @@ Route::controller(BMIController::class)->middleware('auth:user')->prefix('user/b
     Route::post('/store', 'store');
     Route::get('/get-last-record', 'getLastRecord');
     Route::get('/get-all-records', 'getAllRecords');
+    Route::get('/get-last-three-records', 'getThreeLastRecords');
+
 });
 
 //user blood sugar
