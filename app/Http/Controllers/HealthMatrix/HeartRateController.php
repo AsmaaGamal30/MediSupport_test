@@ -56,11 +56,12 @@ class HeartRateController extends Controller
                 ->orderByDesc('created_at')
                 ->paginate(10);
 
-            $data = HeartRateHistoryResource::collection($heartRateRecords);
+            $data = HeartRateResource::collection($heartRateRecords);
 
             return $this->apiResponse(
                 data: [
                     'current_page' => $heartRateRecords->currentPage(),
+                    'last_page'=> $heartRateRecords->lastPage(),
                     'Records' => $data,
                 ],
                 message: "All heart rate selected",
@@ -82,7 +83,7 @@ class HeartRateController extends Controller
                 ->take(7)
                 ->get();
 
-            $data = HeartRateHistoryResource::collection($heartRateRecords);
+            $data = HeartRateResource::collection($heartRateRecords);
 
             return $this->apiResponse(
                 data: $data,
@@ -105,7 +106,7 @@ class HeartRateController extends Controller
                 ->take(3)
                 ->get();
 
-            $data = HeartRateHistoryResource::collection($heartRateRecords);
+            $data = HeartRateResource::collection($heartRateRecords);
 
             return $this->apiResponse(
                 data: $data,

@@ -88,6 +88,7 @@ class DoctorOfflineBookingController extends Controller
             return $this->apiResponse(
                 data: [
                     'current_page' => $bookings->currentPage(),
+                    'last_page'=> $bookings->lastPage(),
                     'data' => $data,
                 ],
                 message: "Doctor booking details retrieved successfully",

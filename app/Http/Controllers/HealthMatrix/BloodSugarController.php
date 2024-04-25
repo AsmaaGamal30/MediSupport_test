@@ -65,11 +65,12 @@ class BloodSugarController extends Controller
                 ->orderByDesc('created_at')
                 ->paginate(10);
 
-            $data = BloodSugarHistoryResource::collection($bloodSugarRecords);
+            $data = BloodSugarResource::collection($bloodSugarRecords);
 
             return $this->apiResponse(
                 data: [
                     'current_page' => $bloodSugarRecords->currentPage(),
+                    'last_page'=> $bloodSugarRecords->lastPage(),
                     'Records' => $data,
                 ],
                 message: "All blood sugar selected",
@@ -91,7 +92,7 @@ class BloodSugarController extends Controller
                 ->take(3)
                 ->get();
 
-            $data = BloodSugarHistoryResource::collection($bloodSugarRecords);
+            $data = BloodSugarResource::collection($bloodSugarRecords);
 
             return $this->apiResponse(
                 data: $data,
@@ -114,7 +115,7 @@ class BloodSugarController extends Controller
                 ->take(7)
                 ->get();
 
-            $data = BloodSugarHistoryResource::collection($bloodSugarRecords);
+            $data = BloodSugarResource::collection($bloodSugarRecords);
 
             return $this->apiResponse(
                 data: $data,
