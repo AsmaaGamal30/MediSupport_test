@@ -55,6 +55,7 @@ class OfflineDoctorsController extends Controller
             return $this->apiResponse(
                 data: [
                     'current_page' => $doctors->currentPage(),
+                    'last_page'=> $doctors->lastPage(),
                     'data' => $data,
                 ],
                 message: "Doctors sorted by rating",

@@ -141,6 +141,7 @@ class BookingController extends Controller
             return $this->apiResponse(
                 data: [
                     'current_page' => $bookings->currentPage(),
+                    'last_page'=> $bookings->lastPage(),
                     'data' => $data,
                 ],
                 message: "User Booking details retrieved successfully",
