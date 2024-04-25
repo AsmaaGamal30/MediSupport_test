@@ -145,7 +145,7 @@ class BMIController extends Controller
 
 // BMIController.php
 
-return $this->successData('Last BMI record retrieved successfully', 200, $resource);
+return $this->successData('Last BMI record retrieved successfully', $resource);
 }
 
 public function getAllRecords(Request $request)
@@ -178,8 +178,28 @@ public function getAllRecords(Request $request)
         'links' => $paginationLinks,
     ];
 
-    return $this->successData('BMI records retrieved successfully', 200, $responseData);
+    return $this->successData('BMI records retrieved successfully', $responseData);
 }
+
+
+public function getThreeLastRecords()
+{
+    // Check if the user is authenticated
+    if (!Auth::guard('user')->check()) {
+        return $this->unauthorizedResponse();
+    }
+
+    $userId = Auth::guard('user')->user()->id;
+
+    // Select the three most recent BMI records
+    $lastRecords = BMI::where('user_id', $userId)->latest()->take(3)->get();
+
+    // Transform the data using a resource class
+    $resource = BMIHistoryResource::collection($lastRecords);
+
+    return $this->successData('Three most recent BMI records retrieved successfully', $resource);
+}
+
 
 
 }

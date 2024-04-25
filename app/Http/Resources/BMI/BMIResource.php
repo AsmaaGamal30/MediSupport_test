@@ -21,6 +21,7 @@ class BMIResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'result' => $this->result,
+            'advice_id' => $this->bmiAdvice ? $this->bmiAdvice->id : null,
             'advice' => $advice,
             'key' => $this->bmiAdvice ? $this->bmiAdvice->key : null,
             'created_at' => $this->created_at->format('Y-m-d'),
