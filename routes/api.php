@@ -165,6 +165,8 @@ Route::controller(BMIController::class)->middleware('auth:user')->prefix('user/b
     Route::get('/get-last-record', 'getLastRecord');
     Route::get('/get-all-records', 'getAllRecords');
     Route::get('/get-last-three-records', 'getThreeLastRecords');
+    Route::get('/get-last-seven-records', 'getLastSevenBMIRecords');
+
 
 });
 
@@ -243,10 +245,10 @@ Route::get('/doctors/first-eight', [DoctorController::class, 'getFirstEightDocto
 // update password doctor
 Route::put('/doctor-password', [DoctorController::class, 'updatePassword'])->middleware('auth:doctor');
 //update doctor info
-Route::put('/doctors/{id}', [DoctorController::class, 'updateDoctor'])->middleware('auth:doctor');
+Route::post('/update-doctors', [DoctorController::class, 'updateDoctor'])->middleware('auth:doctor');
 
 // update password admin
-Route::put('/admin-password', [AdminAuthController::class, 'updatePassword'])->middleware('auth:admin');
+Route::post('/admin-password', [AdminAuthController::class, 'updatePassword'])->middleware('auth:admin');
 
 //get all contact for admin
 Route::get('/all-contact', [ContactController::class, 'index'])->middleware('auth:admin');
@@ -257,6 +259,8 @@ Route::get('/contacts/first-eight', [ContactController::class, 'getFirstEightCon
 Route::prefix('auth/user')->group(function () {
     Route::post('/online-bookings', [OnlineBookingController::class, 'store']);
     Route::get('/all-bookings', [OnlineBookingController::class, 'getUserBookings']);
+    Route::delete('/delete-bookings/{id}',[OnlineBookingController::class, 'deleteBooking']);
+
 });
 
 
@@ -272,12 +276,15 @@ Route::prefix('auth/user')->group(function () {
     Route::get('/online-doctors', [OnlineDoctorController::class, 'getOnlineDoctors']);
     Route::get('/ten-online-doctors', [OnlineDoctorController::class, 'getFirstTenOnlineDoctors']);
     Route::get('/online-doctor/{id}', [OnlineDoctorController::class, 'getOnlineDoctorById']);
+    
 });
 
 //doctor online booking
 Route::prefix('auth/doctor')->group(function () {
     Route::post('/bookings-accept', [OnlineDoctorController::class, 'acceptBooking']);
     Route::get('/all-bookings', [OnlineDoctorController::class, 'getDoctorBookings']);
+    Route::delete('/delete-bookings/{id}',[OnlineDoctorController::class, 'deleteBooking']);
+
 });
 
 

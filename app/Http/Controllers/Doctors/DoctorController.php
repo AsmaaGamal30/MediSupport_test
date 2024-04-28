@@ -99,25 +99,34 @@ class DoctorController extends Controller
         // Return the doctor resource collection
         return DoctorResource::collection($doctors);
     }
-    public function updateDoctor(UpdateDoctorRequest $request, $id)
+    public function updateDoctor(UpdateDoctorRequest $request)
     {
         try {
             // Ensure the user is authenticated as a doctor
-            if (!Auth::guard('doctor')->check()) {
+            $authenticatedDoctor = Auth::guard('doctor')->user();
+            if (!$authenticatedDoctor) {
                 return $this->error('Unauthenticated', 401);
             }
-
+    
+            // Retrieve the doctor ID from the request body
+            $doctorId = $request->input('doctor_id');
+    
+            // Check if the authenticated doctor's ID matches the provided ID
+            if ($authenticatedDoctor->id != $doctorId) {
+                return $this->error('Unauthorized', 403);
+            }
+    
             // Find the doctor by ID
-            $doctor = Doctor::find($id);
-
+            $doctor = Doctor::find($doctorId);
+    
             // Check if the doctor exists
             if (!$doctor) {
                 return $this->error('Doctor not found', 404);
             }
-
+    
             // Update the doctor's data based on the validated request
             $doctor->update($request->validated());
-
+    
             // Return success response
             return $this->success('Doctor updated successfully');
         } catch (\Exception $e) {
@@ -125,6 +134,7 @@ class DoctorController extends Controller
             return $this->error($e->getMessage(), 500); // Internal Server Error
         }
     }
+    
 
     public function fetchLatestMedicalData()
     {

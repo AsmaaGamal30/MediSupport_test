@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\DoctorBookingNotification;
 use App\Http\Requests\OnlineBookingRequests\OnlineDoctorRequest;
+use App\Http\Requests\OnlineBookingRequests\DeleteBookingRequest;
 
 class OnlineBookingController extends Controller
 {
@@ -57,7 +58,7 @@ class OnlineBookingController extends Controller
 
         $bookings = OnlineBooking::where('user_id', $userId)
             ->with('doctor')
-            ->get();
+            ->paginate(10);
 
         $formattedBookings = $bookings->map(function ($booking) {
             return [
@@ -67,6 +68,44 @@ class OnlineBookingController extends Controller
             ];
         });
 
-        return $this->successData('User bookings retrieved successfully', $formattedBookings);
+        $paginationData = [
+            'first_page_url' => $bookings->url(1),
+            'last_page_url' => $bookings->url($bookings->lastPage()),
+            'prev_page_url' => $bookings->previousPageUrl(),
+            'next_page_url' => $bookings->nextPageUrl(),
+            'total' => $bookings->total(),
+
+        ];
+
+        return $this->successData('Doctor bookings retrieved successfully', [
+            'data' => $formattedBookings,
+            'pagination' => $paginationData,
+        ]);
     }
+
+    public function deleteBooking(Request $request, $id)
+    {
+        // Check if the user is authenticated
+        if (!Auth::guard('user')->check()) {
+            return $this->error('Unauthenticated', 401);
+        }
+
+        $userId = Auth::guard('user')->id();
+
+        // Find the booking by ID
+        $booking = OnlineBooking::where('user_id', $userId)
+            ->where('id', $id)
+            ->first();
+
+        // Check if the booking exists
+        if (!$booking) {
+            return $this->error('Booking not found', 404);
+        }
+
+        // Delete the booking
+        $booking->delete();
+
+        return $this->success('Booking deleted successfully');
+    }
+
 }
