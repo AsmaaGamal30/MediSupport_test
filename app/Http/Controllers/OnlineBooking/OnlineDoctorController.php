@@ -14,6 +14,7 @@ use App\Http\Resources\Doctor\DoctorResource;
 use App\Notifications\UserBookingNotification;
 use App\Http\Requests\OnlineBookingRequests\OnlineDoctorRequest;
 use App\Http\Requests\OnlineBookingRequests\AcceptBookingRequest;
+use App\Http\Requests\OnlineBookingRequests\DeleteBookingRequest;
 
 class OnlineDoctorController extends Controller
 {
@@ -137,7 +138,8 @@ class OnlineDoctorController extends Controller
 
         $bookings = OnlineBooking::where('doctor_id', $doctorId)
             ->with('user')
-            ->get();
+            ->paginate(10);
+
 
         $formattedBookings = $bookings->map(function ($booking) {
             return [
@@ -147,6 +149,44 @@ class OnlineDoctorController extends Controller
             ];
         });
 
-        return $this->successData('Doctor bookings retrieved successfully', $formattedBookings);
+        $paginationData = [
+            'first_page_url' => $bookings->url(1),
+            'last_page_url' => $bookings->url($bookings->lastPage()),
+            'prev_page_url' => $bookings->previousPageUrl(),
+            'next_page_url' => $bookings->nextPageUrl(),
+            'per_page' => $bookings->perPage(),
+            'total' => $bookings->total(),
+        ];
+
+        return $this->successData('Doctor bookings retrieved successfully', [
+            'data' => $formattedBookings,
+            'pagination' => $paginationData,
+        ]);
+    }
+
+
+    public function deleteBooking(Request  $request, $id)
+    {
+        // Check if the user is authenticated
+        if (!Auth::guard('doctor')->check()) {
+            return $this->error('Unauthenticated', 401);
+        }
+
+        $doctorId = Auth::guard('doctor')->id();
+
+        // Find the booking by ID
+        $booking = OnlineBooking::where('doctor_id', $doctorId)
+            ->where('id', $id)
+            ->first();
+
+        // Check if the booking exists
+        if (!$booking) {
+            return $this->error('Booking not found', 404);
+        }
+
+        // Delete the booking
+        $booking->delete();
+
+        return $this->success('Booking deleted successfully');
     }
 }

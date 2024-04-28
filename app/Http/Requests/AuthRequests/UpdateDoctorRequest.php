@@ -22,10 +22,11 @@ class UpdateDoctorRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'doctor_id' => 'required',
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:doctors,email,' . $this->route('id'),
-            'avatar' => 'sometimes|string|max:255',
+            'avatar' => 'image|mimes:jpg,png,jpeg',
             'phone' => 'sometimes|string|max:20',
             'specialization' => 'sometimes|string|max:255',
             'bio' => 'sometimes|string',
