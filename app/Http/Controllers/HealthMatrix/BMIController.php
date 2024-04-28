@@ -3,25 +3,20 @@
 namespace App\Http\Controllers\HealthMatrix;
 
 use App\Models\BMI;
-use App\Models\User;
 use App\Models\BMIAdvice;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\BMI\BMIResource;
 use App\Http\Resources\BMI\BMIHistoryResource;
-use App\Http\Resources\BMI\LastSevenRecordResource;
 use App\Http\Requests\HealthMatrixRequests\BMICreateRequest;
 
 class BMIController extends Controller
 {
     use ApiResponse;
 
-    public function store(BMICreateRequest $request) // Inject BMICreateRequest into the store method
+    public function store(BMICreateRequest $request) 
     {
         // Check if the user is authenticated
         if (!Auth::guard('user')->check()) {
@@ -208,19 +203,12 @@ public function getLastSevenBMIRecords()
         $userId = auth()->guard('user')->user()->id;
 
         $bmiRecords = BMI::where('user_id', $userId)
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
+            ->take(7)
             ->get();
 
-        // Get the last 7 records
-        $lastSevenRecords = $bmiRecords->take(7);
 
-        // If there are fewer than 7 records, return null
-        if ($lastSevenRecords->count() < 7) {
-            return $this->error('Data not found', 404);
-
-        }
-
-        $data = LastSevenRecordResource::collection($lastSevenRecords);
+        $data = BMIResource::collection($bmiRecords);
 
         return $this->successData('Last seven BMI records selected', $data);
 
@@ -233,4 +221,3 @@ public function getLastSevenBMIRecords()
 
 
     }
-    
