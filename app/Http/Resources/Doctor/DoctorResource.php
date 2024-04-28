@@ -21,6 +21,7 @@ class DoctorResource extends JsonResource
         $averageRating = $this->calculateAverageRating($this->rates);
 
         return [
+            'id'=> $this->id,
             'admin_id' => $this->admin_id,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
@@ -33,6 +34,7 @@ class DoctorResource extends JsonResource
             'clinic_location' => $this->clinic_location,
             'active_status' => $this->active_status,
             'average_rating' => $averageRating,
+            'working_hours' => $this->working_hours,
         ];
     }
 
