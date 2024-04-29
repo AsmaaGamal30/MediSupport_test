@@ -155,6 +155,8 @@ class OnlineDoctorController extends Controller
             'prev_page_url' => $bookings->previousPageUrl(),
             'next_page_url' => $bookings->nextPageUrl(),
             'per_page' => $bookings->perPage(),
+            'current_page' =>  $bookings->currentPage(),
+            'last_page' =>  $bookings->lastPage(),
             'total' => $bookings->total(),
         ];
 

@@ -16,7 +16,7 @@ class BMIController extends Controller
 {
     use ApiResponse;
 
-    public function store(BMICreateRequest $request) 
+    public function store(BMICreateRequest $request)
     {
         // Check if the user is authenticated
         if (!Auth::guard('user')->check()) {
@@ -167,6 +167,8 @@ public function getAllRecords(Request $request)
         'last_page_url' => $records->url($records->lastPage()),
         'prev_page_url' => $records->previousPageUrl(),
         'next_page_url' => $records->nextPageUrl(),
+        'current_page' => $records->currentPage(),
+        'last_page' => $records->lastPage(),
         'total' => $records->total(),
     ];
 
