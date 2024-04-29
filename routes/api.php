@@ -276,14 +276,13 @@ Route::prefix('auth/user')->group(function () {
     Route::get('/online-doctors', [OnlineDoctorController::class, 'getOnlineDoctors']);
     Route::get('/ten-online-doctors', [OnlineDoctorController::class, 'getFirstTenOnlineDoctors']);
     Route::get('/online-doctor/{id}', [OnlineDoctorController::class, 'getOnlineDoctorById']);
-    
+
 });
 
 //doctor online booking
 Route::prefix('auth/doctor')->group(function () {
     Route::post('/bookings-accept', [OnlineDoctorController::class, 'acceptBooking']);
     Route::get('/all-bookings', [OnlineDoctorController::class, 'getDoctorBookings']);
-    Route::delete('/delete-bookings/{id}',[OnlineDoctorController::class, 'deleteBooking']);
 
 });
 
