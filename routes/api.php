@@ -283,7 +283,6 @@ Route::prefix('auth/user')->group(function () {
 Route::prefix('auth/doctor')->group(function () {
     Route::post('/bookings-accept', [OnlineDoctorController::class, 'acceptBooking']);
     Route::get('/all-bookings', [OnlineDoctorController::class, 'getDoctorBookings']);
-    Route::delete('/delete-bookings/{id}',[OnlineDoctorController::class, 'deleteBooking']);
 
 
 });
