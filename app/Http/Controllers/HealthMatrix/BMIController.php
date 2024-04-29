@@ -156,7 +156,7 @@ public function getAllRecords(Request $request)
     $userId = Auth::guard('user')->user()->id;
 
     // Retrieve all BMI records paginated with 5 records per page
-    $records = BMI::where('user_id', $userId)->paginate(5);
+    $records = BMI::where('user_id', $userId)->paginate(10);
 
     // Transform the data using a resource class
     $resource = BMIHistoryResource::collection($records);
