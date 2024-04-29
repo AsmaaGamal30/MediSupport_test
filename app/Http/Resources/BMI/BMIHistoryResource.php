@@ -17,6 +17,7 @@ class BMIHistoryResource extends JsonResource
         $advice = $this->bmiAdvice ? $this->bmiAdvice->advice : 'No advice available';
 
         return [
+            'id' => $this->id,
             'user_id' => $this->user_id,
             'result' => $this->result,
             'key' => $this->bmiAdvice ? $this->bmiAdvice->key : null,

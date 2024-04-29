@@ -101,7 +101,7 @@ class BloodPressureController extends Controller
     {
         try {
             $user = Auth::user();
-            $perPage = 5;
+            $perPage = 10;
             $allMeasurements = $user->bloodPressures()->paginate($perPage);
 
             return BloodPressureHistoryResource::collection($allMeasurements);
