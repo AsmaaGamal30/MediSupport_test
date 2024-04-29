@@ -167,28 +167,5 @@ class OnlineDoctorController extends Controller
     }
 
 
-    public function deleteBooking(Request  $request, $id)
-    {
-        // Check if the user is authenticated
-        if (!Auth::guard('doctor')->check()) {
-            return $this->error('Unauthenticated', 401);
-        }
 
-        $doctorId = Auth::guard('doctor')->id();
-
-        // Find the booking by ID
-        $booking = OnlineBooking::where('doctor_id', $doctorId)
-            ->where('id', $id)
-            ->first();
-
-        // Check if the booking exists
-        if (!$booking) {
-            return $this->error('Booking not found', 404);
-        }
-
-        // Delete the booking
-        $booking->delete();
-
-        return $this->success('Booking deleted successfully');
-    }
 }
