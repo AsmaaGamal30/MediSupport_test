@@ -73,6 +73,8 @@ class OnlineBookingController extends Controller
             'last_page_url' => $bookings->url($bookings->lastPage()),
             'prev_page_url' => $bookings->previousPageUrl(),
             'next_page_url' => $bookings->nextPageUrl(),
+            'current_page' =>  $bookings->currentPage(),
+            'last_page' => $bookings->lastPage(),
             'total' => $bookings->total(),
 
         ];
