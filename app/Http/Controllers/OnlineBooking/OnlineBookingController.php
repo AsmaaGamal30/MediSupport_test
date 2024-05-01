@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Notifications\DoctorBookingNotification;
+use App\Http\Resources\OnlineBooking\OnlineBookingResource;
 use App\Http\Requests\OnlineBookingRequests\OnlineDoctorRequest;
 use App\Http\Requests\OnlineBookingRequests\DeleteBookingRequest;
 
@@ -37,7 +38,7 @@ class OnlineBookingController extends Controller
         $booking = new OnlineBooking();
         $booking->user_id = $userId;
         $booking->doctor_id = $request->doctor_id;
-        $booking->status = 'waiting';
+        $booking->status = false;
         $booking->save();
 
         $doctorMessage = "You have a new booking request.";
@@ -46,7 +47,7 @@ class OnlineBookingController extends Controller
 
         return $this->success('Booking request submitted successfully', 201);
     }
-
+    
     public function getUserBookings(Request $request)
     {
         // Check if the user is authenticated
@@ -60,14 +61,8 @@ class OnlineBookingController extends Controller
             ->with('doctor')
             ->paginate(10);
 
-        $formattedBookings = $bookings->map(function ($booking) {
-            return [
-                'id' => $booking->id,
-                'username' => $booking->user->name . ' ' . $booking->user->last_name,
-                'doctor_name' => $booking->doctor->first_name . ' ' . $booking->doctor->last_name,
-                'status' => $booking->status,
-            ];
-        });
+        // Format the collection of bookings using OnlineBookingResource
+        $formattedBookings = OnlineBookingResource::collection($bookings);
 
         $paginationData = [
             'first_page_url' => $bookings->url(1),
@@ -80,7 +75,7 @@ class OnlineBookingController extends Controller
 
         ];
 
-        return $this->successData('Doctor bookings retrieved successfully', [
+        return $this->successData('User bookings retrieved successfully', [
             'data' => $formattedBookings,
             'pagination' => $paginationData,
         ]);

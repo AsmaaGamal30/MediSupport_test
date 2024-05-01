@@ -39,6 +39,7 @@ class BMIController extends Controller
         $advice = $this->getAdvice($result);
 
         // Store BMI record for the current user
+        //gender 1=> male , 0=> female
         $this->storeBMIRecord($userId, $validatedData['gender'], $validatedData['age'], $height, $weight, $bmi, $advice);
 
         return $this->success('BMI data stored successfully');

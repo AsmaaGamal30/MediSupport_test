@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Doctor\DoctorResource;
 use App\Notifications\UserBookingNotification;
-use App\Http\Requests\OnlineBookingRequests\OnlineDoctorRequest;
 use App\Http\Requests\OnlineBookingRequests\AcceptBookingRequest;
-use App\Http\Requests\OnlineBookingRequests\DeleteBookingRequest;
+use App\Http\Resources\OnlineBooking\DoctorBookingResource;
+
 
 class OnlineDoctorController extends Controller
 {
@@ -92,78 +92,73 @@ class OnlineDoctorController extends Controller
 
         return $this->successData('Online doctor retrieved successfully', new DoctorResource($onlineDoctor));
     }
-    public function acceptBooking(AcceptBookingRequest  $request)
-    {
-        if (!Auth::guard('doctor')->check()) {
-            return $this->error('Unauthenticated', 401);
-        }
 
-        $authenticatedDoctorId = Auth::guard('doctor')->user()->id;
-        Log::info('Authenticated doctor ID: ' . $authenticatedDoctorId);
-
-        $validator = Validator::make($request->all(), [
-            'booking_id' => 'required|exists:online_bookings,id',
-            'status' => 'required|in:accepted',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->error($validator->errors()->first(), 400);
-        }
-
-        $booking = OnlineBooking::findOrFail($request->booking_id);
-
-        Log::info('Booking doctor ID: ' . $booking->doctor_id);
-
-        if ($booking->doctor_id !== $authenticatedDoctorId) {
-            return $this->error('You are not authorized to accept this booking', 403);
-        }
-
-        $booking->status = $request->status;
-        $booking->save();
-
-        $userMessage = "Your booking request have accepted.";
-        $user = $booking->user;
-        $user->notify(new UserBookingNotification($userMessage));
-
-        return $this->success('Booking accepted successfully', 200);
+    public function acceptBooking(AcceptBookingRequest $request)
+{
+    if (!Auth::guard('doctor')->check()) {
+        return $this->error('Unauthenticated', 401);
     }
 
-    public function getDoctorBookings(Request $request)
-    {
-        if (!Auth::guard('doctor')->check()) {
-            return $this->error('Unauthenticated', 401);
-        }
+    $authenticatedDoctorId = Auth::guard('doctor')->user()->id;
+    Log::info('Authenticated doctor ID: ' . $authenticatedDoctorId);
 
-        $doctorId = Auth::guard('doctor')->id();
+    // Validate request data
+    $validator = Validator::make($request->all(), [
+        'booking_id' => 'required|exists:online_bookings,id',
+        'status' => 'required|boolean|in:1',
+    ]);
 
-        $bookings = OnlineBooking::where('doctor_id', $doctorId)
-            ->with('user')
-            ->paginate(10);
-
-
-        $formattedBookings = $bookings->map(function ($booking) {
-            return [
-                'username' => $booking->user->name . ' ' . $booking->user->last_name,
-                'doctor_name' => $booking->doctor->first_name . ' ' . $booking->doctor->last_name,
-                'status' => $booking->status,
-            ];
-        });
-
-        $paginationData = [
-            'first_page_url' => $bookings->url(1),
-            'last_page_url' => $bookings->url($bookings->lastPage()),
-            'prev_page_url' => $bookings->previousPageUrl(),
-            'next_page_url' => $bookings->nextPageUrl(),
-            'per_page' => $bookings->perPage(),
-            'current_page' =>  $bookings->currentPage(),
-            'last_page' =>  $bookings->lastPage(),
-            'total' => $bookings->total(),
-        ];
-
-        return $this->successData('Doctor bookings retrieved successfully', [
-            'data' => $formattedBookings,
-            'pagination' => $paginationData,
-        ]);
+    if ($validator->fails()) {
+        return $this->error($validator->errors()->first(), 400);
     }
 
+    // Ensure the authenticated doctor is authorized to accept the booking
+    $booking = OnlineBooking::findOrFail($request->booking_id);
+    if ($booking->doctor_id !== $authenticatedDoctorId) {
+        return $this->error('You are not authorized to accept this booking', 403);
+    }
+
+    // Update booking status
+    $booking->status = true;
+    $booking->save();
+
+    // Notify user about the booking acceptance
+    $userMessage = "Your booking request has been accepted.";
+    $user = $booking->user;
+    $user->notify(new UserBookingNotification($userMessage));
+
+    return $this->success('Booking accepted successfully', 200);
+}public function getDoctorBookings(Request $request)
+{
+    if (!Auth::guard('doctor')->check()) {
+        return $this->error('Unauthenticated', 401);
+    }
+
+    $doctorId = Auth::guard('doctor')->id();
+
+    $bookings = OnlineBooking::where('doctor_id', $doctorId)
+        ->with('user')
+        ->paginate(10);
+
+    // Format the collection of bookings using DoctorBookingResource
+    $formattedBookings = DoctorBookingResource::collection($bookings);
+
+    // Pagination data
+    $paginationData = [
+        'first_page_url' => $bookings->url(1),
+        'last_page_url' => $bookings->url($bookings->lastPage()),
+        'prev_page_url' => $bookings->previousPageUrl(),
+        'next_page_url' => $bookings->nextPageUrl(),
+        'per_page' => $bookings->perPage(),
+        'current_page' =>  $bookings->currentPage(),
+        'last_page' =>  $bookings->lastPage(),
+        'total' => $bookings->total(),
+    ];
+
+    // Return success response with formatted bookings and pagination data
+    return $this->successData('Doctor bookings retrieved successfully', [
+        'data' => $formattedBookings,
+        'pagination' => $paginationData,
+    ]);
+}
 }
