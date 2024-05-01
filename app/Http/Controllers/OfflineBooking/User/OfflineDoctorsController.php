@@ -15,7 +15,7 @@ class OfflineDoctorsController extends Controller
 {
     use ApiResponse;
 
-    public function selectTopDoctorsByRating(PageRequest $request)
+    public function selectTopDoctorsByRating()
     {
         try {
             $maxDoctors = 10;
@@ -27,16 +27,13 @@ class OfflineDoctorsController extends Controller
                     $avgRating = $doctor->rates_count > 0 ? $doctor->rates->avg('rate') : 0;
                     return [$avgRating, $doctor->rates_count];
                 })
-                ->take($maxDoctors)->forPage($request->page, 10);
+                ->take($maxDoctors);
 
             $data = OfflineDoctorsResource::collection($doctors);
 
             return $this->apiResponse(
-                data: [
-                    'current_page' => $request->page,
-                    'data' => $data,
-                ],
-                message: "Top 80 doctors sorted by rating",
+                data : $data,
+                message: "Top 10 doctors sorted by rating",
                 statuscode: 200,
                 error: false,
             );
