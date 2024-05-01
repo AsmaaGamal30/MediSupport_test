@@ -5,7 +5,7 @@ namespace App\Http\Resources\OnlineBooking;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class OnlineBookingResource extends JsonResource
+class DoctorBookingResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,7 +19,9 @@ class OnlineBookingResource extends JsonResource
             'username' => $this->user->name . ' ' . $this->user->last_name,
             'doctor_name' => $this->doctor->first_name . ' ' . $this->doctor->last_name,
             'status' => $this->status,
+            'email' => $this->user->email,
             'created_at' => $this->created_at->format('Y-m-d H:i:s')
+
 
         ];
     }

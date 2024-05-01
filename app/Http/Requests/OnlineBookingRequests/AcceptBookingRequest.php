@@ -23,7 +23,7 @@ class AcceptBookingRequest extends FormRequest
     {
         return [
             'booking_id' => 'required|exists:online_bookings,id',
-            'status' => 'required|in:accepted',
+            'status' => 'required|boolean|in:1',
         ];
     }
 }
