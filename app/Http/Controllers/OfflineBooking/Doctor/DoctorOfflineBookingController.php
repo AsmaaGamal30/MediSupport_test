@@ -122,12 +122,26 @@ class DoctorOfflineBookingController extends Controller
                 return $this->error('Date not found or you are not authorized to delete this date.', 404);
             }
     
+            // Check if there are bookings associated with this date and time
+            $bookingsCount = Booking::where('date_id', $date->id)
+                ->where('time_id', $time->id)
+                ->count();
+    
+            if ($bookingsCount > 0) {
+                // If bookings exist for this time, do not delete it
+                return $this->error('Cannot delete time with associated bookings.', 403);
+            }
+    
+            // Get the count of times associated with this date
             $timesCount = Time::where('date_id', $date->id)->count();
     
             if ($timesCount > 1) {
+                // If there are multiple times associated with this date, delete only the time
                 $time->delete();
             } else {
-                $date->delete(); 
+                // If there's only one time associated with this date, delete both time and date
+                $time->delete();
+                $date->delete();
             }
     
             return $this->success('Appointment deleted successfully', 200);
