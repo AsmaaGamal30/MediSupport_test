@@ -19,6 +19,7 @@ class DoctorBookingResource extends JsonResource
             'user_id' => $this->user->id,
             'first_name' =>  $this->user->name,
             'last_name' =>  $this->user->last_name,
+            'email' => $this->user->email,
             'time' => $this->time->time,
             'date' => $this->date->date,
             'created_at' => $this->created_at
