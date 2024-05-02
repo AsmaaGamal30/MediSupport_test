@@ -8,4 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class AdminCash extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['doctor_id', 'online_booking_id', 'total'];
+
+    public function online_booking()
+    {
+        return $this->belongsTo(OnlineBooking::class);
+    }
+
+    public function doctor()
+    {
+        return $this->belongsTo(Doctor::class);
+    }
 }

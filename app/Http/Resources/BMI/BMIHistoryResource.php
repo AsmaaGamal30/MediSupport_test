@@ -24,8 +24,9 @@ class BMIHistoryResource extends JsonResource
             'advice' => $advice,
             'created_at' => $this->created_at,
             'day-name' => substr($this->created_at->format('l'), 0, 3),
+            'user_name' => $this->user->name . ' ' . $this->user->last_name,
+
 
         ];
-
     }
 }

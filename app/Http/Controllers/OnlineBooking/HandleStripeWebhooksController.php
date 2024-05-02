@@ -32,13 +32,13 @@ class HandleStripeWebhooksController extends Controller
                     $doctorAmount = $amount - $adminAmount;
                     DoctorCash::create([
                         'doctor_id' => $doctorId,
-                        'booking_id' => $bookingId,
+                        'online_booking_id' => $bookingId,
                         'total' => $doctorAmount,
                     ]);
                     AdminCash::create([
                         'admin_id' => 1,
                         'doctor_id' => $doctorId,
-                        'booking_id' => $bookingId,
+                        'online_booking_id' => $bookingId,
                         'total' => $adminAmount,
                     ]);
                     break;

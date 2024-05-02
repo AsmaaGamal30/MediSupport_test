@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Chat\MessagesController;
 use App\Http\Controllers\Doctors\DoctorController;
 use App\Http\Controllers\Article\ArticleController;
+use App\Http\Controllers\Article\ShowArticleController;
 use App\Http\Controllers\Rating\{RatingController};
 use App\Http\Controllers\contact\{ContactController};
 use App\Http\Controllers\VideoCall\UserVideoCallController;
@@ -166,8 +167,6 @@ Route::controller(BMIController::class)->middleware('auth:user')->prefix('user/b
     Route::get('/get-all-records', 'getAllRecords');
     Route::get('/get-last-three-records', 'getThreeLastRecords');
     Route::get('/get-last-seven-records', 'getLastSevenBMIRecords');
-
-
 });
 
 //user blood sugar
@@ -219,11 +218,15 @@ Route::controller(BookingController::class)->middleware(['custom-auth:' . 'user'
 
 
 //articles
-Route::get('/articles', [ArticleController::class, 'index'])->middleware(['auth:user,admin,doctor']);
+Route::get('/articles', [ArticleController::class, 'index'])->middleware(['auth:user,admin']);
 Route::get('/articles/{id}', [ArticleController::class, 'show'])->middleware(['auth:user,admin,doctor']);
 Route::post('/articles', [ArticleController::class, 'store'])->middleware('auth:doctor');
 Route::post('/articles/{id}', [ArticleController::class, 'update'])->middleware('auth:doctor');
 Route::delete('articles/{article}', [ArticleController::class, 'destroy'])->middleware('auth:doctor,admin');
+
+Route::get('/doctor/articles', [ShowArticleController::class, 'getAllDoctorArticles'])->middleware('auth:doctor');
+Route::get('/doctor/latest-article', [ShowArticleController::class, 'getLatestDoctorArticle'])->middleware('auth:doctor');
+
 
 //doctor offline booking
 Route::controller(DoctorOfflineBookingController::class)->middleware(['custom-auth:' . 'doctor'])->prefix('doctor')->group(function () {
@@ -259,8 +262,7 @@ Route::get('/contacts/first-eight', [ContactController::class, 'getFirstEightCon
 Route::prefix('auth/user')->group(function () {
     Route::post('/online-bookings', [OnlineBookingController::class, 'store']);
     Route::get('/all-bookings', [OnlineBookingController::class, 'getUserBookings']);
-    Route::delete('/delete-bookings/{id}',[OnlineBookingController::class, 'deleteBooking']);
-
+    Route::delete('/delete-bookings/{id}', [OnlineBookingController::class, 'deleteBooking']);
 });
 
 
@@ -276,15 +278,12 @@ Route::prefix('auth/user')->group(function () {
     Route::get('/online-doctors', [OnlineDoctorController::class, 'getOnlineDoctors']);
     Route::get('/ten-online-doctors', [OnlineDoctorController::class, 'getFirstTenOnlineDoctors']);
     Route::get('/online-doctor/{id}', [OnlineDoctorController::class, 'getOnlineDoctorById']);
-
 });
 
 //doctor online booking
 Route::prefix('auth/doctor')->group(function () {
     Route::post('/bookings-accept', [OnlineDoctorController::class, 'acceptBooking']);
     Route::get('/all-bookings', [OnlineDoctorController::class, 'getDoctorBookings']);
-
-
 });
 
 
@@ -297,7 +296,7 @@ Route::prefix('auth/doctor')->group(function () {
 
 //user payment
 Route::post('/user/online-booking/payment/{bookingId}', [PaymentController::class, 'makePayment'])->middleware('auth:user');
-Route::post('/stripe/webhook', [HandleStripeWebhooksController::class, 'handleWebhook']);
+//Route::post('/stripe/webhook', [HandleStripeWebhooksController::class, 'handleWebhook']);
 
 
 //doctor video call
@@ -321,7 +320,9 @@ Route::prefix('auth/user')->group(function () {
 
 Route::prefix('auth/doctor')->middleware('auth:doctor')->group(function () {
     Route::get('/fetchLatestMedicalData', [DoctorController::class, 'fetchLatestMedicalData']);
-    Route::get('/fetchMedicalData/{userId}', [DoctorController::class, 'fetchMedicalData']);
+    Route::get('/fetchBloodPressureData/{userId}', [DoctorController::class, 'fetchBloodPressureData']);
+    Route::get('/fetchBMIData/{userId}', [DoctorController::class, 'fetchBMIData']);
+    Route::get('/fetchBloodSugerData/{userId}', [DoctorController::class, 'fetchBloodSugerData']);
 });
 
 //users data for admin panel
