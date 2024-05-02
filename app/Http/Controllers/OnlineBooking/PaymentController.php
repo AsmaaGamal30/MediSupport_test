@@ -29,7 +29,7 @@ class PaymentController extends Controller
                 return $this->error('No available online booking with this ID.', 404);
             }
 
-            if ($onlineBooking->status !== 'accepted') {
+            if ($onlineBooking->status !== 1) {
                 return $this->error('The booking is not in an accepted status for payment. Please wait until your doctor accepts your booking request.', 422);
             }
 
