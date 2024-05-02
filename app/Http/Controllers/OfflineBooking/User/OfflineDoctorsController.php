@@ -32,7 +32,7 @@ class OfflineDoctorsController extends Controller
             $data = OfflineDoctorsResource::collection($doctors);
 
             return $this->apiResponse(
-                data : $data,
+                data: $data,
                 message: "Top 10 doctors sorted by rating",
                 statuscode: 200,
                 error: false,
@@ -52,7 +52,7 @@ class OfflineDoctorsController extends Controller
             return $this->apiResponse(
                 data: [
                     'current_page' => $doctors->currentPage(),
-                    'last_page'=> $doctors->lastPage(),
+                    'last_page' => $doctors->lastPage(),
                     'data' => $data,
                 ],
                 message: "Doctors sorted by rating",
@@ -62,8 +62,8 @@ class OfflineDoctorsController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to select doctors', 500);
         }
-    }//end selectDoctors
-   
+    } //end selectDoctors
+
     public function searchDoctors(SearchPageRequest $request)
     {
         try {
@@ -74,6 +74,11 @@ class OfflineDoctorsController extends Controller
                 ->orWhere('last_name', 'like', "%$searchTerm%")
                 ->orWhere('specialization', 'like', "%$searchTerm%");
 
+            $totalDoctorsCount = $query->count();
+
+            $pageSize = 10;
+            $lastPage = ceil($totalDoctorsCount / $pageSize);
+
             $doctors = $query->with('rates')
                 ->withCount('rates')
                 ->get()
@@ -82,13 +87,14 @@ class OfflineDoctorsController extends Controller
 
                     return [$avgRating, $doctor->rates_count];
                 })
-                ->forPage($request->page, 10);
+                ->forPage($request->page, $pageSize);
 
             $data = OfflineDoctorsResource::collection($doctors);
 
             return $this->apiResponse(
                 data: [
                     'current_page' => $request->page,
+                    'last_page' => $lastPage,
                     'data' => $data,
                 ],
                 message: "Doctors filtered and sorted",
@@ -98,5 +104,5 @@ class OfflineDoctorsController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to search doctors', 500);
         }
-    }//end searchDoctors
+    } //end searchDoctors
 }

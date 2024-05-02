@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\OfflineBooking\Doctor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OfflineBookingRequests\StoreDateRequest;
-use App\Http\Requests\OfflineBookingRequests\StoreTimeRequest;
+use App\Http\Requests\OfflineBookingRequests\{DeleteAppointmentRequest, StoreDateRequest, StoreTimeRequest, UpdateAppointmentRequest};
+use App\Http\Resources\OfflineBooking\AppointmentResource;
 use App\Http\Resources\OfflineBooking\DoctorBookingResource;
 use App\Models\Booking;
 use App\Models\Date;
+use App\Models\Doctor;
 use App\Models\Time;
 use App\Traits\ApiResponse;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
+
 
 class DoctorOfflineBookingController extends Controller
 {
@@ -63,7 +64,7 @@ class DoctorOfflineBookingController extends Controller
             if ($selectedDate->lt($currentDate)) {
                 return $this->error('The selected date must be greater than or equal to the current date.', 422);
             }
-            
+
             Time::create([
                 'doctor_id' => $doctorId,
                 'time' => $request->time,
@@ -75,6 +76,135 @@ class DoctorOfflineBookingController extends Controller
             return $this->error('Failed to store time', 500);
         }
     } //end storeTime
+
+    public function getALLAppointment()
+    {
+        try {
+            $doctorId = auth()->guard('doctor')->id();
+
+            $appointments = Doctor::findOrFail($doctorId)
+            ->dates()
+            ->with('times')
+            ->get();
+
+            return $this->apiResponse(
+                data: [
+                    'Appointments' => AppointmentResource::collection($appointments),
+                ],
+                message: "All Appointments retrieved successfully",
+                statuscode: 200,
+                error: false,
+            );
+            
+        } catch (\Exception $e) {
+            return $this->error('Failed to retrieve dates and times', 500);
+        }
+    }// end getALLAppointment
+  
+    public function deleteAppointment(DeleteAppointmentRequest $request)
+    {
+        try {
+            $doctorId = auth()->guard('doctor')->id();
+    
+            $time = Time::where('id', $request->time_id)
+                ->where('doctor_id', $doctorId)
+                ->first();
+    
+            if (!$time) {
+                return $this->error('Time not found or you are not authorized to delete this time.', 404);
+            }
+    
+            $date = Date::where('id', $request->date_id)
+                ->where('doctor_id', $doctorId)
+                ->first();
+    
+            if (!$date) {
+                return $this->error('Date not found or you are not authorized to delete this date.', 404);
+            }
+    
+            $timesCount = Time::where('date_id', $date->id)->count();
+    
+            if ($timesCount > 1) {
+                $time->delete();
+            } else {
+                $date->delete(); 
+            }
+    
+            return $this->success('Appointment deleted successfully', 200);
+        } catch (\Exception $e) {
+            return $this->error('Failed to delete appointment', 500);
+        }
+    }//end deleteAppointment
+    
+    public function updateAppointment(UpdateAppointmentRequest $request)
+    {
+        try {
+            $doctorId = auth()->guard('doctor')->id();
+
+            // Find the specific time to update based on time_id and doctor_id
+            $time = Time::where('id', $request->time_id)
+                ->where('doctor_id', $doctorId)
+                ->first();
+
+            if (!$time) {
+                return $this->error('Time not found or you are not authorized to update this appointment.', 404);
+            }
+
+            // Find the date associated with the specified date_id
+            $date = Date::where('id', $request->date_id)
+                ->where('doctor_id', $doctorId)
+                ->first();
+
+            if (!$date) {
+                return $this->error('Date not found or invalid date ID.', 404);
+            }
+
+
+            // Check if the date has multiple times associated with it
+            $otherTimesCount = Time::where('date_id', $date->id)
+                ->where('id', '!=', $time->id)
+                ->count();
+
+            if ($otherTimesCount > 0) {
+                // Check if the new_date is different from the existing date
+                if ($request->new_date != $date->date) {
+                    // Check if the new_date exists with the specified time
+                    $existingDateWithTime = Date::where('date', $request->new_date)
+                        ->where('id', $time->date_id) // Check if this date is associated with the same time
+                        ->first();
+
+                    if (!$existingDateWithTime) {
+                        // Create a new date for the specific time
+                        $newDate = Date::create([
+                            'doctor_id' => $doctorId,
+                            'date' => $request->new_date,
+                        ]);
+
+                        // Associate the specific time with the new date
+                        $time->date_id = $newDate->id;
+                        $time->save();
+                    } else {
+                        // Update the time if the new_date is associated with the same time
+                        $time->time = $request->new_time;
+                        $time->save();
+                    }
+                } else {
+                    // Update the time for the existing date if the new_date is the same
+                    $time->time = $request->new_time;
+                    $time->save();
+                }
+            } else {
+                    $time->time = $request->new_time;
+                    $time->save();
+
+                    $date->date = $request->new_date;
+                    $date->save();
+            }
+            return $this->success('Appointment updated successfully', 200);
+        } catch (\Exception $e) {
+            return $this->error('Failed to update appointment', 500);
+        }
+    }//end updateAppointment
 
     public function getAllOfflineBooking()
     {
@@ -88,7 +218,7 @@ class DoctorOfflineBookingController extends Controller
             return $this->apiResponse(
                 data: [
                     'current_page' => $bookings->currentPage(),
-                    'last_page'=> $bookings->lastPage(),
+                    'last_page' => $bookings->lastPage(),
                     'data' => $data,
                 ],
                 message: "Doctor booking details retrieved successfully",
@@ -99,4 +229,6 @@ class DoctorOfflineBookingController extends Controller
             return $this->error('Failed to retrieve doctor bookings', 500);
         }
     } //end getAllOfflineBooking
+
+
 }

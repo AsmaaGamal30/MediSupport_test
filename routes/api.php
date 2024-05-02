@@ -18,6 +18,7 @@ use App\Http\Controllers\Password\{UserForgotPassword, UserResetPassword,};
 use App\Http\Controllers\OfflineBooking\Doctor\DoctorOfflineBookingController;
 use App\Http\Controllers\OfflineBooking\User\{BookingController, OfflineDoctorsController};
 use App\Http\Controllers\Auth\{AdminAuthController, UserAuthController, DoctorAuthController, UserSocialAuthController};
+use App\Http\Controllers\Booking\DoctorBookingCountController;
 use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController, HeartRateController};
 use App\Http\Controllers\OnlineBooking\HandleStripeWebhooksController;
 use App\Http\Controllers\OnlineBooking\PaymentController;
@@ -232,7 +233,19 @@ Route::get('/doctor/latest-article', [ShowArticleController::class, 'getLatestDo
 Route::controller(DoctorOfflineBookingController::class)->middleware(['custom-auth:' . 'doctor'])->prefix('doctor')->group(function () {
     Route::post('/store-date', 'storeDate');
     Route::post('/store-time', 'storeTime');
+    Route::delete('/delete-appointment','deleteAppointment');
+    Route::put('/update-appointment','updateAppointment');
+    Route::get('/get-all-appointment','getALLAppointment');
     Route::get('/all-booking', 'getAllOfflineBooking');
+});
+
+// doctor booking count
+
+Route::controller(DoctorBookingCountController::class)->middleware(['custom-auth:' . 'doctor'])->prefix('doctor')->group(function () {
+    Route::get('/all-booking-count', 'getAllBookingCount');
+    Route::get('/all-new-booking-count', 'getNewBookingCount');
+    Route::get('/all-old-booking-count', 'getOldBookingCount');
+    
 });
 
 
