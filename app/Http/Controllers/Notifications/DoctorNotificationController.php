@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Traits\ApiResponse;
 class DoctorNotificationController extends Controller
 {
-    use ApiResponse; 
+    use ApiResponse;
     public function index(Request $request)
     {
         // Check if the doctor is authenticated
@@ -18,6 +18,7 @@ class DoctorNotificationController extends Controller
             // Return the notifications for the authenticated user
             $notifications = $doctor->notifications->map(function ($notification) {
                 return [
+                    'id' => $notification->id,
                     'message' => $notification->data['message'],
                     'read_at' => $notification->read_at,
                 ];

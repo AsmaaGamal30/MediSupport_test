@@ -41,13 +41,17 @@ class OnlineBookingController extends Controller
         $booking->status = false;
         $booking->save();
 
-        $doctorMessage = "You have a new booking request.";
+         // Get the user's name
+     $userName = $booking->user->name . ' ' . $booking->user->last_name ;
+
+     $doctorMessage = "$userName is booking now.";
+
         $doctor = $booking->doctor;
         $doctor->notify(new DoctorBookingNotification($doctorMessage));
 
         return $this->success('Booking request submitted successfully', 201);
     }
-    
+
     public function getUserBookings(Request $request)
     {
         // Check if the user is authenticated

@@ -138,13 +138,18 @@ class OnlineDoctorController extends Controller
     $booking->status = true;
     $booking->save();
 
-    // Notify user about the booking acceptance
-    $userMessage = "Your booking request has been accepted.";
+     // Get the doctor's name
+     $doctorName = $booking->doctor->first_name . ' ' . $booking->doctor->last_name;
+
+     // Notify user about the booking acceptance with doctor's name
+     $userMessage = "Dr. $doctorName has accepted your booking. You can now call with him.";
     $user = $booking->user;
     $user->notify(new UserBookingNotification($userMessage));
 
     return $this->success('Booking accepted successfully', 200);
-}public function getDoctorBookings(Request $request)
+}
+
+public function getDoctorBookings(Request $request)
 {
     if (!Auth::guard('doctor')->check()) {
         return $this->error('Unauthenticated', 401);
