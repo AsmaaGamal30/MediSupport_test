@@ -19,6 +19,7 @@ class UserNotificationController extends Controller
             // Return the notifications for the authenticated user
             $notifications = $user->notifications->map(function ($notification) {
                 return [
+                    'id' => $notification->id,
                     'message' => $notification->data['message'],
                     'read_at' => $notification->read_at,
                 ];
