@@ -31,6 +31,7 @@ class DoctorDetailsResource extends JsonResource
             'Avatar' => $this->avatar,
             'photo' => $this->photo,
             'price' => $this->price,
+            'phone' => $this->phone,
             'bio' => $this->bio,
             'clinic_location' => $this->clinic_location,
             'avg_rating' => number_format($this->rates->avg('rate'),1),
