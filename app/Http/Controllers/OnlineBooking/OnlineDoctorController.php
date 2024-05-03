@@ -20,28 +20,44 @@ class OnlineDoctorController extends Controller
 {
     use ApiResponse;
 
-    public function getOnlineDoctors()
-    {
-        if (!Auth::guard('user')->check()) {
-            return $this->error('Unauthenticated', 401);
-        }
-
-        $onlineDoctors = Doctor::where('active_status', 1)
-            ->with('rates')
-            ->get();
-
-        if ($onlineDoctors->isEmpty()) {
-            return $this->success('There are no online doctors currently.');
-        }
-
-        $onlineDoctors = $onlineDoctors->sortByDesc(function ($doctor) {
-            return $doctor->rates->isEmpty() ? 0 : $doctor->rates->avg('rate');
-        });
-
-        $doctorResources = DoctorResource::collection($onlineDoctors);
-
-        return $this->successData('Online doctors retrieved successfully', $doctorResources);
+    public function getOnlineDoctors(Request $request)
+{
+    // Check if the user is authenticated
+    if (!Auth::guard('user')->check()) {
+        return $this->error('Unauthenticated', 401);
     }
+
+
+    $onlineDoctors = Doctor::where('active_status', 1)
+        ->with('rates')
+        ->paginate(10);
+
+    // If there are no online doctors, return success response with a message
+    if ($onlineDoctors->isEmpty()) {
+        return $this->success('There are no online doctors currently.');
+    }
+
+    // Format the paginated collection of online doctors using DoctorResource
+    $formattedOnlineDoctors = DoctorResource::collection($onlineDoctors);
+
+    // Construct pagination data
+    $paginationData = [
+        'first_page_url' => $onlineDoctors->url(1),
+        'last_page_url' => $onlineDoctors->url($onlineDoctors->lastPage()),
+        'prev_page_url' => $onlineDoctors->previousPageUrl(),
+        'next_page_url' => $onlineDoctors->nextPageUrl(),
+        'current_page' =>  $onlineDoctors->currentPage(),
+        'last_page' => $onlineDoctors->lastPage(),
+        'total' => $onlineDoctors->total(),
+    ];
+
+    // Return success response with formatted data and pagination information
+    return $this->successData('Online doctors retrieved successfully', [
+        'data' => $formattedOnlineDoctors,
+        'pagination' => $paginationData,
+    ]);
+}
+
 
     public function getFirstTenOnlineDoctors()
     {
@@ -75,7 +91,7 @@ class OnlineDoctorController extends Controller
         }
 
         $validator = Validator::make(['doctor_id' => $doctorId], [
-            'doctor_id' => 'required|exists:doctors,id',
+            'doctor_id' => 'exists:doctors,id',
         ]);
 
         if ($validator->fails()) {
