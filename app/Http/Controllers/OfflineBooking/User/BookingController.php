@@ -37,11 +37,11 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve doctor details', 500);
         }
-    }//end getDoctorDetails
+    } //end getDoctorDetails
 
     public function getDoctorDateTimes(DateIdRequest $request)
     {
-       
+
         try {
             $dateId = $request->id;
 
@@ -60,88 +60,100 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve available times', 500);
         }
-    }//end getDoctorDateTimes
+    } //end getDoctorDateTimes
 
     public function BookAppointment(BookingRequest $request)
     {
         try {
-            $userAuthId = auth()->guard('user')->user()->id;
+        $userAuthId = auth()->guard('user')->user()->id;
+      
+        $currentDate = now()->toDateString();
+        $isDateValid = Date::where('id', $request->date_id)
+            ->whereDate('date', '>=', $currentDate)
+            ->exists();
+
+        if (!$isDateValid) {
+            return $this->error('The specified date is not valid', 400);
+        }
+        $isDateAddedByDoctor = Date::where('id', $request->date_id)
+            ->where('doctor_id', $request->doctor_id)
+            ->exists();
+
+        if (!$isDateAddedByDoctor) {
+            return $this->error('The specified doctor did not add this date', 400);
+        }
+
+        $isDateAddedByDoctor = Time::where('id', $request->time_id)
+            ->where('doctor_id', $request->doctor_id)
+            ->exists();
+
+        if (!$isDateAddedByDoctor) {
+            return $this->error('The specified doctor did not add this time', 400);
+        }
+        $isTimeAssociatedWithDate = Time::where('id', $request->time_id)
+            ->where('date_id', $request->date_id)
+            ->exists();
+
+        if (!$isTimeAssociatedWithDate) {
+            return $this->error('The specified time is not associated with the selected date', 400);
+        }
+
+        $isUserAlreadyBooked = Booking::where('time_id', $request->time_id)
+            ->where('date_id', $request->date_id)
+            ->where('user_id', $userAuthId)
+            ->exists();
+
+        if ($isUserAlreadyBooked) {
+            return $this->error('You have already booked this appointment', 400);
+        }
+
+        $isAppointmentAvailable = Time::where('id', $request->time_id)
+            ->doesntHave('booking')
+            ->exists();
+
+        if (!$isAppointmentAvailable) {
+            return $this->error('The selected appointment is already booked', 400);
+        }
+        $hasPendingAppointment = Booking::where('doctor_id', $request->doctor_id)
+            ->where('user_id', $userAuthId)
+            ->whereHas('date', function ($query) {
+                $query->whereDate('date', '>=', Carbon::today()); // Filter based on 'date' relationship
+            })
+            ->exists();
 
 
-            $currentDate = now()->toDateString();
-            $isDateValid = Date::where('id', $request->date_id)
-                ->whereDate('date', '>=', $currentDate)
-                ->exists();
+        if ($hasPendingAppointment) {
+            return $this->error('You already have a pending appointment with this doctor.', 400);
+        }
 
-            if (!$isDateValid) {
-                return $this->error('The specified date is not valid', 400);
-            }
-            $isDateAddedByDoctor = Date::where('id', $request->date_id)
-                ->where('doctor_id', $request->doctor_id)
-                ->exists();
+        Booking::create([
+            'doctor_id' => $request->doctor_id,
+            'user_id' => $userAuthId,
+            'time_id' => $request->time_id,
+            'date_id' => $request->date_id,
+        ]);
 
-            if (!$isDateAddedByDoctor) {
-                return $this->error('The specified doctor did not add this date', 400);
-            }
-
-            $isDateAddedByDoctor = Time::where('id', $request->time_id)
-                ->where('doctor_id', $request->doctor_id)
-                ->exists();
-
-            if (!$isDateAddedByDoctor) {
-                return $this->error('The specified doctor did not add this time', 400);
-            }
-            $isTimeAssociatedWithDate = Time::where('id', $request->time_id)
-                ->where('date_id', $request->date_id)
-                ->exists();
-
-            if (!$isTimeAssociatedWithDate) {
-                return $this->error('The specified time is not associated with the selected date', 400);
-            }
-
-            $isUserAlreadyBooked = Booking::where('time_id', $request->time_id)
-                ->where('date_id', $request->date_id)
-                ->where('user_id', $userAuthId)
-                ->exists();
-
-            if ($isUserAlreadyBooked) {
-                return $this->error('You have already booked this appointment', 400);
-            }
-
-            $isAppointmentAvailable = Time::where('id', $request->time_id)
-                ->doesntHave('booking')
-                ->exists();
-
-            if (!$isAppointmentAvailable) {
-                return $this->error('The selected appointment is already booked', 400);
-            }
-
-            Booking::create([
-                'doctor_id' => $request->doctor_id,
-                'user_id' => $userAuthId,
-                'time_id' => $request->time_id,
-                'date_id' => $request->date_id,
-            ]);
-
-            return $this->success('Appointment booked successfully', 200);
+        return $this->success('Appointment booked successfully', 200);
         } catch (\Exception $e) {
             return $this->error('Failed to book appointment', 500);
         }
-    }//end BookAppointment
+    } //end BookAppointment
 
     public function selectUserBooking()
     {
         try {
             $userId = auth()->guard('user')->user()->id;
 
-            $bookings = Booking::where('user_id', $userId)->paginate(10);
+            $bookings = Booking::where('user_id', $userId)
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
 
             $data = UserBookingResource::collection($bookings);
 
             return $this->apiResponse(
                 data: [
                     'current_page' => $bookings->currentPage(),
-                    'last_page'=> $bookings->lastPage(),
+                    'last_page' => $bookings->lastPage(),
                     'data' => $data,
                 ],
                 message: "User Booking details retrieved successfully",
@@ -151,7 +163,7 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve user bookings', 500);
         }
-    }//end selectUserBooking
+    } //end selectUserBooking
 
 
     public function deleteBooking(BookingIdRequest $request)
@@ -170,7 +182,7 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             return $this->error('Failed to delete booking', 500);
         }
-    }//end deleteBooking
+    } //end deleteBooking
 
 
 }
