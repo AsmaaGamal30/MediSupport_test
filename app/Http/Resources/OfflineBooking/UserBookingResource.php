@@ -23,6 +23,7 @@ class UserBookingResource extends JsonResource
              'time' => $this->time->time, 
              'date' => $this->date->date,
              'created_at' => $this->created_at
+             
         ]; 
     }
 }

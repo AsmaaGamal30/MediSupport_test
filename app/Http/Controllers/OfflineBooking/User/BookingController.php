@@ -80,7 +80,7 @@ class BookingController extends Controller
             ->exists();
 
         if (!$isDateAddedByDoctor) {
-            return $this->error('The specified doctor did not add this date', 400);
+            return $this->error('The specified doctor did not add this date', 401);
         }
 
         $isDateAddedByDoctor = Time::where('id', $request->time_id)
@@ -88,14 +88,14 @@ class BookingController extends Controller
             ->exists();
 
         if (!$isDateAddedByDoctor) {
-            return $this->error('The specified doctor did not add this time', 400);
+            return $this->error('The specified doctor did not add this time', 402);
         }
         $isTimeAssociatedWithDate = Time::where('id', $request->time_id)
             ->where('date_id', $request->date_id)
             ->exists();
 
         if (!$isTimeAssociatedWithDate) {
-            return $this->error('The specified time is not associated with the selected date', 400);
+            return $this->error('The specified time is not associated with the selected date', 403);
         }
 
         $isUserAlreadyBooked = Booking::where('time_id', $request->time_id)
@@ -104,7 +104,7 @@ class BookingController extends Controller
             ->exists();
 
         if ($isUserAlreadyBooked) {
-            return $this->error('You have already booked this appointment', 400);
+            return $this->error('You have already booked this appointment', 404);
         }
 
         $isAppointmentAvailable = Time::where('id', $request->time_id)
@@ -112,7 +112,7 @@ class BookingController extends Controller
             ->exists();
 
         if (!$isAppointmentAvailable) {
-            return $this->error('The selected appointment is already booked', 400);
+            return $this->error('The selected appointment is already booked', 405);
         }
         $hasPendingAppointment = Booking::where('doctor_id', $request->doctor_id)
             ->where('user_id', $userAuthId)
@@ -123,7 +123,7 @@ class BookingController extends Controller
 
 
         if ($hasPendingAppointment) {
-            return $this->error('You already have a pending appointment with this doctor.', 400);
+            return $this->error('You already have a pending appointment with this doctor.', 420);
         }
 
         Booking::create([
