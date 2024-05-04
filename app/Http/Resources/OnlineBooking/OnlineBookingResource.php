@@ -19,6 +19,8 @@ class OnlineBookingResource extends JsonResource
             'username' => $this->user->name . ' ' . $this->user->last_name,
             'doctor_name' => $this->doctor->first_name . ' ' . $this->doctor->last_name,
             'status' => $this->status,
+            'specialization' => $this->doctor->specialization,
+            'active_status' => $this->doctor->active_status,
             'created_at' => $this->created_at->format('Y-m-d H:i:s')
 
         ];

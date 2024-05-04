@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\OnlineBooking;
 
+use App\Models\Doctor;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use App\Models\OnlineBooking;
@@ -12,6 +13,8 @@ use App\Notifications\DoctorBookingNotification;
 use App\Http\Resources\OnlineBooking\OnlineBookingResource;
 use App\Http\Requests\OnlineBookingRequests\OnlineDoctorRequest;
 use App\Http\Requests\OnlineBookingRequests\DeleteBookingRequest;
+use Carbon\Carbon;
+
 
 class OnlineBookingController extends Controller
 {
@@ -34,6 +37,22 @@ class OnlineBookingController extends Controller
             return $this->error($validator->errors()->first(), 422);
         }
 
+        // Ensure that the specified doctor exists and is an online doctor
+        $doctor = Doctor::findOrFail($request->doctor_id);
+        if (!$doctor->active_status) {
+            return $this->error('The specified doctor is not active', 422);
+        }
+
+        $sixHoursAgo = Carbon::now()->subHours(6);
+        $previousBooking = OnlineBooking::where('user_id', $user->id)
+            ->where('doctor_id', $doctor->id)
+            ->where('created_at', '>=', $sixHoursAgo)
+            ->exists();
+
+        if ($previousBooking) {
+            return $this->error('You cannot make another booking for this doctor at the moment. Please try again later.', 423);
+        }
+
         $userId = $user->id;
         $booking = new OnlineBooking();
         $booking->user_id = $userId;
@@ -41,16 +60,16 @@ class OnlineBookingController extends Controller
         $booking->status = false;
         $booking->save();
 
-         // Get the user's name
-     $userName = $booking->user->name . ' ' . $booking->user->last_name ;
+        // Get the user's name
+        $userName = $booking->user->name . ' ' . $booking->user->last_name;
 
-     $doctorMessage = "$userName is booking now.";
+        $doctorMessage = "$userName is booking now.";
 
-        $doctor = $booking->doctor;
         $doctor->notify(new DoctorBookingNotification($doctorMessage));
 
         return $this->success('Booking request submitted successfully', 201);
     }
+
 
     public function getUserBookings(Request $request)
     {
@@ -63,6 +82,7 @@ class OnlineBookingController extends Controller
 
         $bookings = OnlineBooking::where('user_id', $userId)
             ->with('doctor')
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         // Format the collection of bookings using OnlineBookingResource
@@ -73,7 +93,7 @@ class OnlineBookingController extends Controller
             'last_page_url' => $bookings->url($bookings->lastPage()),
             'prev_page_url' => $bookings->previousPageUrl(),
             'next_page_url' => $bookings->nextPageUrl(),
-            'current_page' =>  $bookings->currentPage(),
+            'current_page' => $bookings->currentPage(),
             'last_page' => $bookings->lastPage(),
             'total' => $bookings->total(),
 

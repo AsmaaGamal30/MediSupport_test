@@ -12,8 +12,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Doctor\DoctorResource;
 use App\Notifications\UserBookingNotification;
-use App\Http\Requests\OnlineBookingRequests\AcceptBookingRequest;
+use App\Http\Resources\OnlineBooking\OnlineDoctorResource;
 use App\Http\Resources\OnlineBooking\DoctorBookingResource;
+use App\Http\Requests\OnlineBookingRequests\AcceptBookingRequest;
 
 
 class OnlineDoctorController extends Controller
@@ -106,7 +107,7 @@ class OnlineDoctorController extends Controller
             return $this->error('Doctor not found or not currently online.', 404);
         }
 
-        return $this->successData('Online doctor retrieved successfully', new DoctorResource($onlineDoctor));
+        return $this->successData('Online doctor retrieved successfully', new OnlineDoctorResource($onlineDoctor));
     }
 
     public function acceptBooking(AcceptBookingRequest $request)
@@ -159,6 +160,7 @@ public function getDoctorBookings(Request $request)
 
     $bookings = OnlineBooking::where('doctor_id', $doctorId)
         ->with('user')
+        ->orderBy('created_at', 'desc')
         ->paginate(10);
 
     // Format the collection of bookings using DoctorBookingResource
