@@ -19,11 +19,11 @@ class UserBookingResource extends JsonResource
              'first_name' =>  $this->doctor->first_name,
              'last_name' =>  $this->doctor->last_name,
              'clinic_location' => $this->doctor->clinic_location,
-             'specialization' => $this->specialization,
+             'specialization' => $this->doctor->specialization,
              'time' => $this->time->time, 
              'date' => $this->date->date,
              'created_at' => $this->created_at
-             
+
         ]; 
     }
 }
