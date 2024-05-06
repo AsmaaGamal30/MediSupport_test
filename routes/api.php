@@ -243,9 +243,6 @@ Route::controller(DoctorOfflineBookingController::class)->middleware(['custom-au
 
 Route::controller(DoctorBookingCountController::class)->middleware(['custom-auth:' . 'doctor'])->prefix('doctor')->group(function () {
     Route::get('/all-booking-count', 'getAllBookingCount');
-    Route::get('/all-new-booking-count', 'getNewBookingCount');
-    Route::get('/all-old-booking-count', 'getOldBookingCount');
-    
 });
 
 
