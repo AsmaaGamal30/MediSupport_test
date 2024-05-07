@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Validator;
 
@@ -113,6 +114,11 @@ class UserAuthController extends Controller
 
             // Validate the request data
             $validatedData = $request->validated();
+
+            if (isset($validatedData['password'])) {
+                $validatedData['password'] = Hash::make($validatedData['password']);
+            }
+
 
             // Handle avatar upload
             if ($request->hasFile('avatar')) {
