@@ -22,6 +22,7 @@ use App\Models\BMI;
 use App\Models\Booking;
 use App\Models\HeartRate;
 use App\Models\OnlineBooking;
+use Illuminate\Pagination\Paginator;
 
 class DoctorController extends Controller
 {
@@ -138,6 +139,25 @@ class DoctorController extends Controller
         }
     }
 
+    public function customPaginate($items, $perPage = 10)
+    {
+        $currentPage = request()->query('page', 1);
+        $totalItems = count($items);
+        $offset = ($currentPage - 1) * $perPage;
+        $items = array_slice($items, $offset, $perPage);
+
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $totalItems,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return $paginator;
+    }
+
+
 
     public function fetchLatestMedicalData()
     {
@@ -169,8 +189,12 @@ class DoctorController extends Controller
             $latestMedicalData[] = $latestData;
         }
 
-        return $this->sendData('Latest medical data for all users who booked the doctor', $latestMedicalData);
+        // Paginate the latestMedicalData with a limit of 10
+        $latestMedicalDataPaginated = $this->customPaginate($latestMedicalData, 10);
+
+        return $this->sendData('Latest medical data for all users who booked the doctor', $latestMedicalDataPaginated);
     }
+
 
     public function fetchBloodPressureData($userId)
     {
