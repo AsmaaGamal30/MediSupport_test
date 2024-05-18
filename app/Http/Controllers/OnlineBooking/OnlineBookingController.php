@@ -57,7 +57,7 @@ class OnlineBookingController extends Controller
         $booking = new OnlineBooking();
         $booking->user_id = $userId;
         $booking->doctor_id = $request->doctor_id;
-        $booking->status = false;
+        $booking->status = 0;
         $booking->save();
 
         // Get the user's name
@@ -129,5 +129,4 @@ class OnlineBookingController extends Controller
 
         return $this->success('Booking deleted successfully');
     }
-
 }

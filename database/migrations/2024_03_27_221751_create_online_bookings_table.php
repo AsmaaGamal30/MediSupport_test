@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
-            $table->boolean('status')->default(false);
+            $table->integer('status')->default(0);
             $table->timestamps();
-         });
+        });
     }
 
     /**

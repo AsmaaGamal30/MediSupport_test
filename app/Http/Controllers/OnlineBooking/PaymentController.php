@@ -47,8 +47,8 @@ class PaymentController extends Controller
                 $user->stripe_customer_id = $customer->id;
                 $user->save();
             }
-            $paymentMethod = $this->createPaymentMethod($request->token);
-            $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+            // $paymentMethod = $this->createPaymentMethod($request->token);
+            // $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
 
             // Retrieve the related doctor
@@ -59,17 +59,17 @@ class PaymentController extends Controller
             }
 
             $booking_price = $doctor->price * 100;
-            $admin_amount = $booking_price * 0.1;
-            $doctor_amount = $booking_price - $admin_amount;
+            // $admin_amount = $booking_price * 0.1;
+            // $doctor_amount = $booking_price - $admin_amount;
 
             // Create a payment intent
             $paymentIntent = PaymentIntent::create([
                 'amount' =>  $booking_price,
                 'currency' => 'usd',
                 'description' => 'Payment for Doctor ' . $doctor->first_name . ' ' . $doctor->last_name . ' booking',
-                'payment_method' => $paymentMethod->id,
+                //'payment_method' => $paymentMethod->id,
                 //'confirmation_method' => 'manual', // Use manual confirmation
-                'confirm' => true,
+                //'confirm' => true,
                 'automatic_payment_methods' => [
                     'enabled' => true,
                     'allow_redirects' => 'never', // Disable redirects
@@ -78,6 +78,7 @@ class PaymentController extends Controller
                 'metadata' => [
                     'booking_id' => $onlineBooking->id,
                     'doctor_id' => $doctor->id,
+                    'user_id' => auth()->guard('user')->id(),
                 ],
                 'customer' => $user->stripe_customer_id,
             ]);
@@ -86,13 +87,13 @@ class PaymentController extends Controller
                 'response' => [
                     'id' =>  $paymentIntent->id,
                     'client_secret' => $paymentIntent->client_secret,
-                    'amount' =>  $paymentIntent->amount,
+                    // 'amount' =>  $paymentIntent->amount,
                     'customer' =>  $paymentIntent->customer,
-                    'payment_method' => $paymentIntent->payment_method,
-                    'description' =>  $paymentIntent->description,
+                    // 'payment_method' => $paymentIntent->payment_method,
+                    // 'description' =>  $paymentIntent->description,
                     'metadata' =>  $paymentIntent->metadata,
-                    'statement_descriptor' => $paymentIntent->statement_descriptor,
-                    'user_id' => $onlineBooking->user_id,
+                    // 'statement_descriptor' => $paymentIntent->statement_descriptor,
+                    //'user_id' => $onlineBooking->user_id,
                 ],
             ]);
         } catch (Exception $e) {
@@ -100,14 +101,14 @@ class PaymentController extends Controller
         }
     }
 
-    private function createPaymentMethod($token)
-    {
-        return PaymentMethod::create([
-            'type' => 'card',
-            'card' => [
-                'token' => $token,
-            ],
+    // private function createPaymentMethod($token)
+    // {
+    //     return PaymentMethod::create([
+    //         'type' => 'card',
+    //         'card' => [
+    //             'token' => $token,
+    //         ],
 
-        ]);
-    }
+    //     ]);
+    // }
 }
