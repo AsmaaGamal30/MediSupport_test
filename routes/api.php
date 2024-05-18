@@ -233,9 +233,9 @@ Route::get('/doctor/latest-article', [ShowArticleController::class, 'getLatestDo
 Route::controller(DoctorOfflineBookingController::class)->middleware(['custom-auth:' . 'doctor'])->prefix('doctor')->group(function () {
     Route::post('/store-date', 'storeDate');
     Route::post('/store-time', 'storeTime');
-    Route::delete('/delete-appointment','deleteAppointment');
-    Route::put('/update-appointment','updateAppointment');
-    Route::get('/get-all-appointment','getALLAppointment');
+    Route::delete('/delete-appointment', 'deleteAppointment');
+    Route::put('/update-appointment', 'updateAppointment');
+    Route::get('/get-all-appointment', 'getALLAppointment');
     Route::get('/all-booking', 'getAllOfflineBooking');
 });
 
@@ -274,6 +274,7 @@ Route::prefix('auth/user')->group(function () {
     Route::get('/all-bookings', [OnlineBookingController::class, 'getUserBookings']);
     Route::delete('/delete-bookings/{id}', [OnlineBookingController::class, 'deleteBooking']);
 });
+//Route::post('/user/complete-booking', [OnlineDoctorController::class, 'completeBookingStatus'])->middleware('auth:user');
 
 
 //user notifications
@@ -306,7 +307,9 @@ Route::prefix('auth/doctor')->group(function () {
 
 //user payment
 Route::post('/user/online-booking/payment/{bookingId}', [PaymentController::class, 'makePayment'])->middleware('auth:user');
-//Route::post('/stripe/webhook', [HandleStripeWebhooksController::class, 'handleWebhook']);
+Route::post('/webhook', [HandleStripeWebhooksController::class, 'handleWebhook']);
+
+
 
 
 //doctor video call

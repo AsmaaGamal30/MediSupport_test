@@ -164,7 +164,7 @@ class DoctorController extends Controller
         $doctorId = auth()->guard('doctor')->id();
 
         $onlineBookedUsers = OnlineBooking::where('doctor_id', $doctorId)
-            ->where('status', 1)
+            ->where('status', 2)
             ->pluck('user_id');
         $offlineBookedUsers = Booking::where('doctor_id', $doctorId)->pluck('user_id');
 
@@ -201,7 +201,7 @@ class DoctorController extends Controller
         $doctorId = auth()->guard('doctor')->id();
 
         $isBooked = OnlineBooking::where('doctor_id', $doctorId)
-            ->where('status', 1)
+            ->where('status', 2)
             ->where('user_id', $userId)
             ->exists();
 
@@ -223,7 +223,7 @@ class DoctorController extends Controller
         $doctorId = auth()->guard('doctor')->id();
 
         $isBooked = OnlineBooking::where('doctor_id', $doctorId)
-            ->where('status', 1)
+            ->where('status', 2)
             ->where('user_id', $userId)
             ->exists();
 
@@ -245,7 +245,7 @@ class DoctorController extends Controller
         $doctorId = auth()->guard('doctor')->id();
 
         $isBooked = OnlineBooking::where('doctor_id', $doctorId)
-            ->where('status', 1)
+            ->where('status', 2)
             ->where('user_id', $userId)
             ->exists();
 
