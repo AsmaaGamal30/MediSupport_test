@@ -17,14 +17,16 @@ class UserNotificationController extends Controller
         // Check if the user is authenticated
         if ($user = Auth::guard('user')->user()) {
             // Return the notifications for the authenticated user
-            $notifications = $user->notifications->map(function ($notification) {
+            $notifications = $user->notifications()
+            ->orderBy('created_at', 'desc') 
+            ->get()
+            ->map(function ($notification) {
                 return [
                     'id' => $notification->id,
                     'message' => $notification->data['message'],
                     'read_at' => $notification->read_at,
                 ];
             });
-
             return $this->successData('Notifications fetched successfully', $notifications);
         } else {
             // Handle the case where the user is not authenticated

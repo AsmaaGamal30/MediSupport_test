@@ -75,6 +75,7 @@ class PaymentController extends Controller
                     'allow_redirects' => 'never', // Disable redirects
                 ],
                 'statement_descriptor' => 'Booking Payment',
+
                 'metadata' => [
                     'booking_id' => $onlineBooking->id,
                     'doctor_id' => $doctor->id,

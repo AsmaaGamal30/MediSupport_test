@@ -13,7 +13,7 @@
         "laravel/socialite": "^5.12",
         "laravel/tinker": "^2.8",
         "pusher/pusher-php-server": "^7.2",
-        "stripe/stripe-php": "^13.16",
+        "stripe/stripe-php": "^14.9",
         "twilio/sdk": "^7.16",
         "tymon/jwt-auth": "^2.0"
     },
