@@ -1,8 +1,10 @@
 <?php
 
+
 namespace App\Http\Controllers\VideoCall;
 
 use App\Models\VideoCall;
+use App\Models\OnlineBooking; 
 use Illuminate\Http\Request;
 use App\Helpers\TwilioHelper;
 use App\Http\Controllers\Controller;
@@ -13,7 +15,7 @@ use App\Traits\ApiResponse;
 
 class UserVideoCallController extends Controller
 {
-    use ApiResponse; // Import the ApiResponse trait
+    use ApiResponse; 
 
     public function __construct()
     {
@@ -23,10 +25,34 @@ class UserVideoCallController extends Controller
     public function generateToken(Request $request)
     {
         $user = Auth::user();
-        $identity = $user->name; // Or any other user identifier you want to use
-        $token = TwilioHelper::generateToken($identity, 'user');
+        $bookingId = $request->input('booking_id');
+        $booking = OnlineBooking::findOrFail($bookingId); 
 
-        return $this->sendData('Token generated successfully', ['generate_token' => $token]);
+        if ($booking->status != 2) {
+            return $this->error('Booking is not in the correct status.', 400);
+        }
+
+        $videoCall = VideoCall::firstOrCreate(
+            ['user_id' => $booking->user_id, 'doctor_id' => $booking->doctor_id],
+            ['status' => 'pending']
+        );
+
+        if (!$videoCall->room_name) {
+            // Generate a unique room name if not already set
+            do {
+                $roomName = 'room_' . uniqid();
+            } while (VideoCall::where('room_name', $roomName)->exists());
+
+            $videoCall->room_name = $roomName;
+            $videoCall->save();
+        }
+
+        $identity = $user->name;
+        $roomName = $videoCall->room_name;
+        $token = TwilioHelper::generateToken($identity, $roomName);
+
+        return $this->sendData('Token generated successfully',
+         ['generate_token' => $token, 'room_name' => $roomName]);
     }
 
     public function startCall(UserStartCallRequest $request)
@@ -103,7 +129,6 @@ class UserVideoCallController extends Controller
         $videoCall->status = 'accepted';
         $videoCall->started_at = now(); // Save the current time as the start time
         $videoCall->save();
-
 
         return $this->success('Call accepted successfully');
     }

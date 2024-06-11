@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\VideoCall;
 
 use App\Models\VideoCall;
+use App\Models\OnlineBooking; 
 use Illuminate\Http\Request;
 use App\Helpers\TwilioHelper;
 use App\Http\Controllers\Controller;
@@ -20,14 +21,39 @@ class DoctorVideoCallController extends Controller
         $this->middleware('auth:doctor');
     }
 
-     public function generateToken(Request $request)
+    public function generateToken(Request $request)
     {
         $doctor = Auth::user();
-        $identity = $doctor->name; // Or any other user identifier you want to use
-        $token = TwilioHelper::generateToken($identity, 'user');
+        $bookingId = $request->input('booking_id');
+        $booking = OnlineBooking::findOrFail($bookingId);
 
-        return $this->sendData('Token generated successfully', ['generate_token' => $token]);
+        if ($booking->status != 2) {
+            return $this->error('Booking is not in the correct status.', 400);
+        }
+
+        $videoCall = VideoCall::firstOrCreate(
+            ['user_id' => $booking->user_id, 'doctor_id' => $booking->doctor_id],
+            ['status' => 'pending']
+        );
+
+        if (!$videoCall->room_name) {
+            // Generate a unique room name if not already set
+            do {
+                $roomName = 'room_' . uniqid();
+            } while (VideoCall::where('room_name', $roomName)->exists());
+
+            $videoCall->room_name = $roomName;
+            $videoCall->save();
+        }
+
+        $identity = $doctor->name;
+        $roomName = $videoCall->room_name;
+        $token = TwilioHelper::generateToken($identity, $roomName);
+
+        return $this->sendData('Token generated successfully', 
+        ['generate_token' => $token, 'room_name' => $roomName]);
     }
+
 
     public function startCall(DoctorStartCallRequest $request)
     {

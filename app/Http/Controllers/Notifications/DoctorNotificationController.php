@@ -16,14 +16,16 @@ class DoctorNotificationController extends Controller
         // Check if the doctor is authenticated
         if ($doctor = Auth::guard('doctor')->user()) {
             // Return the notifications for the authenticated user
-            $notifications = $doctor->notifications->map(function ($notification) {
+            $notifications = $doctor->notifications()
+            ->orderBy('created_at', 'desc') 
+            ->get()
+            ->map(function ($notification) {
                 return [
                     'id' => $notification->id,
                     'message' => $notification->data['message'],
                     'read_at' => $notification->read_at,
                 ];
             });
-
             return $this->successData('Notifications fetched successfully', $notifications);
         } else {
             // Handle the case where the doctor is not authenticated

@@ -2,23 +2,29 @@
 
 namespace App\Helpers;
 
-use Firebase\JWT\JWT;
+use Twilio\Jwt\AccessToken;
+use Twilio\Jwt\Grants\VideoGrant;
 
 class TwilioHelper
 {
-    public static function generateToken($identity)
+    public static function generateToken($identity, $roomName)
     {
         $twilioAccountSid = env('TWILIO_ACCOUNT_SID');
         $twilioApiKey = env('TWILIO_API_KEY');
         $twilioApiSecret = env('TWILIO_API_SECRET');
 
-        $payload = [
-            'iss' => $twilioAccountSid,
-            'sub' => $twilioApiKey,
-            'exp' => time() + 3600, // Token expiration time (1 hour from now)
-            'identity' => $identity,
-        ];
+        $token = new AccessToken(
+            $twilioAccountSid,
+            $twilioApiKey,
+            $twilioApiSecret,
+            3600,
+            $identity
+        );
 
-        return JWT::encode($payload, $twilioApiSecret, 'HS256');
+        $videoGrant = new VideoGrant();
+        $videoGrant->setRoom($roomName);
+        $token->addGrant($videoGrant);
+
+        return $token->toJWT();
     }
 }
