@@ -11,10 +11,18 @@ class VideoCall extends Model
     protected $table = 'video_calls';
 
     protected $fillable = [
-        'client_id',
-        'worker_id',
+       'user_id',
+        'doctor_id',
+        'status',
+        'room_name',
         'started_at',
-        'ended_at',
+        'ended_at'
+    ];
+
+    // The attributes that should be cast to native types
+    protected $casts = [
+        'started_at' => 'datetime',
+        'ended_at' => 'datetime',
     ];
 
     public function user()
