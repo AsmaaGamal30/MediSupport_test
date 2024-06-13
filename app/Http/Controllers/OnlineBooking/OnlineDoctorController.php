@@ -112,43 +112,55 @@ class OnlineDoctorController extends Controller
 
     public function acceptBooking(AcceptBookingRequest $request)
     {
+        // Check if doctor is authenticated
         if (!Auth::guard('doctor')->check()) {
             return $this->error('Unauthenticated', 401);
         }
-
+    
         $authenticatedDoctorId = Auth::guard('doctor')->user()->id;
         Log::info('Authenticated doctor ID: ' . $authenticatedDoctorId);
-
+    
         // Validate request data
         $validator = Validator::make($request->all(), [
             'booking_id' => 'required|exists:online_bookings,id',
             'status' => 'required|integer|in:1',
         ]);
-
+    
         if ($validator->fails()) {
             return $this->error($validator->errors()->first(), 400);
         }
-
-        // Ensure the authenticated doctor is authorized to accept the booking
+    
+        // Retrieve booking by ID
         $booking = OnlineBooking::findOrFail($request->booking_id);
+        Log::info('Booking doctor ID: ' . $booking->doctor_id);
+    
+        // Ensure the authenticated doctor is authorized to accept the booking
         if ($booking->doctor_id !== $authenticatedDoctorId) {
             return $this->error('You are not authorized to accept this booking', 403);
         }
-
+    
+        // Check if the booking has already been accepted
+        if ($booking->status === 1) {
+            return $this->error('This booking has already been accepted', 400);
+        }
+    
         // Update booking status
         $booking->status = 1;
         $booking->save();
-
+    
         // Get the doctor's name
         $doctorName = $booking->doctor->first_name . ' ' . $booking->doctor->last_name;
-
+    
         // Notify user about the booking acceptance with doctor's name
         $userMessage = "Dr. $doctorName has accepted your booking. You can now call with him.";
         $user = $booking->user;
-        $user->notify(new UserBookingNotification($userMessage));
-
+        $notificationType = 'booking_notification';
+    
+        $user->notify(new UserBookingNotification($userMessage, $notificationType));
+    
         return $this->success('Booking accepted successfully', 200);
     }
+    
 
     // public function completeBookingStatus(Request $request)
     // {
