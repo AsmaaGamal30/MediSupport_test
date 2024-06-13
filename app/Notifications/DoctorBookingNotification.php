@@ -8,23 +8,31 @@ use Illuminate\Notifications\Notification;
 class DoctorBookingNotification extends Notification
 {
     use Queueable;
-    protected $message;
 
-    public function __construct( $message)
+    protected $message;
+    protected $types;
+
+    public function __construct($message, $types = [])
     {
-    $this->message = $message;
+        $this->message = $message;
+        $this->types = $types;
     }
 
     public function via($notifiable)
     {
-    return ['database'];
+        return ['database'];
     }
 
     public function toArray($notifiable)
     {
-    return [
-    'message' => $this->message,
-    ];
-}
+        $notificationData = [
+            'message' => $this->message,
+        ];
 
+        if (!empty($this->types)) {
+            $notificationData['types'] = $this->types;
+        }
+
+        return $notificationData;
+    }
 }
