@@ -81,7 +81,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(BMI::class);
     }
-    
+
 
     public function bloodPressures()
     {
@@ -122,5 +122,10 @@ class User extends Authenticatable implements JWTSubject
     public function videoCalls()
     {
         return $this->hasMany(VideoCall::class, 'user_id');
+    }
+
+    public function predictions(): HasMany
+    {
+        return $this->hasMany(Prediction::class);
     }
 }

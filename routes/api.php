@@ -22,6 +22,7 @@ use App\Http\Controllers\Booking\DoctorBookingCountController;
 use App\Http\Controllers\HealthMatrix\{BloodPressureController, BloodSugarController, BMIController, HeartRateController};
 use App\Http\Controllers\OnlineBooking\HandleStripeWebhooksController;
 use App\Http\Controllers\OnlineBooking\PaymentController;
+use App\Http\Controllers\Prediction\PredictionController;
 use App\Http\Controllers\Users\UserController;
 
 //admin auth
@@ -78,7 +79,6 @@ Route::controller(UserResetPassword::class)->prefix('auth/user')->group(function
     Route::post('/verfiy-code', 'verifyVerificationCode');
     Route::post('/reset-password', 'resetPassword');
 });
-
 
 
 
@@ -340,3 +340,6 @@ Route::prefix('auth/doctor')->middleware('auth:doctor')->group(function () {
 Route::get('all-users', [UserController::class, 'index'])->middleware('auth:admin');
 Route::get('/user/count', [UserController::class, 'getUsersCount'])->middleware('auth:admin');
 Route::get('/users/first-eight', [UserController::class, 'getFirstEightUsers'])->middleware('auth:admin');
+
+
+Route::post('/predict', [PredictionController::class, 'predict'])->middleware('auth:user');
