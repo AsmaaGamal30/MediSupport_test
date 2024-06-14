@@ -35,7 +35,7 @@ class UserVideoCallController extends Controller
             return $this->error('OnlineBooking not found or invalid booking ID', 404);
         }
     
-        if ($booking->status != 1) {
+        if ($booking->status != 2) {
             return $this->error('Booking is not in the correct status.', 400);
         }
     
