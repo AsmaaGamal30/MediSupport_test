@@ -185,6 +185,7 @@ class DoctorController extends Controller
                 'heart_rate' => optional($user->heartRates->last())->heart_rate,
                 'systolic' => optional($user->bloodPressures->last())->systolic,
                 'diastolic' => optional($user->bloodPressures->last())->diastolic,
+                'heart_disease_prediction' => optional($user->predictions->last())->prediction,
             ];
             $latestMedicalData[] = $latestData;
         }
