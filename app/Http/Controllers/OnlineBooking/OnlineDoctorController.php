@@ -155,8 +155,10 @@ class OnlineDoctorController extends Controller
         $userMessage = "Dr. $doctorName has accepted your booking. You can now call with him.";
         $user = $booking->user;
         $notificationType = 'booking_notification';
+        $onlineBookingId = $booking->id;
+
     
-        $user->notify(new UserBookingNotification($userMessage, $notificationType));
+        $user->notify(new UserBookingNotification($userMessage, $notificationType, $onlineBookingId));
     
         return $this->success('Booking accepted successfully', 200);
     }

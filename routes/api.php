@@ -317,7 +317,6 @@ Route::prefix('auth/doctor')->group(function () {
     Route::post('/video-call/token', [DoctorVideoCallController::class, 'generateToken']);
     Route::post('/video-call/start', [DoctorVideoCallController::class, 'startCall']);
     Route::post('/video-call/end', [DoctorVideoCallController::class, 'endCall']);
-    Route::post('/call/accept', [DoctorVideoCallController::class, 'acceptCall']);
 });
 
 
@@ -326,7 +325,6 @@ Route::prefix('auth/user')->group(function () {
     Route::post('/video-call/token', [UserVideoCallController::class, 'generateToken']);
     Route::post('/video-call/start', [UserVideoCallController::class, 'startCall']);
     Route::post('/video-call/end', [UserVideoCallController::class, 'endCall']);
-    Route::post('/call/accept', [UserVideoCallController::class, 'acceptCall']);
 });
 
 //fetch users medical data

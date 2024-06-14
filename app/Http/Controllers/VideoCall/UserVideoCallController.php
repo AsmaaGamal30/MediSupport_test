@@ -24,79 +24,84 @@ class UserVideoCallController extends Controller
     }
 
     public function generateToken(Request $request)
-{
-    $user = Auth::user();
-    $bookingId = $request->input('booking_id');
-    $booking = OnlineBooking::findOrFail($bookingId); 
-
-    if ($booking->status != 2) {
-        return $this->error('Booking is not in the correct status.', 400);
-    }
-
-    // Find or create a video call for the user-doctor pair
-    $videoCall = VideoCall::where('user_id', $booking->user_id)
-                          ->where('doctor_id', $booking->doctor_id)
-                          ->whereIn('status', ['pending', 'accepted'])
-                          ->first();
-
-    if (!$videoCall) {
-        // Create a new video call if none exists
-        $videoCall = VideoCall::create([
-            'user_id' => $booking->user_id,
-            'doctor_id' => $booking->doctor_id,
-            'status' => 'pending',
-        ]);
-
-        // Generate a unique room name for the new video call
-        $roomName = 'room_' . uniqid();
-        while (VideoCall::where('room_name', $roomName)->exists()) {
-            $roomName = 'room_' . uniqid();
+    {
+        $user = Auth::user();
+        $bookingId = $request->input('booking_id');
+    
+        // Check if OnlineBooking exists
+        $booking = OnlineBooking::find($bookingId);
+    
+        if (!$booking) {
+            return $this->error('OnlineBooking not found or invalid booking ID', 404);
         }
-
-        $videoCall->room_name = $roomName;
-        $videoCall->save();
-    } elseif ($videoCall->status === 'ended' && $videoCall->user_id === Auth::id()) {
-        // Create a new video call if the existing one is ended
-        $videoCall = VideoCall::create([
-            'user_id' => $booking->user_id,
-            'doctor_id' => $booking->doctor_id,
-            'status' => 'pending',
-        ]);
-
-        // Generate a unique room name for the new video call
-        $roomName = 'room_' . uniqid();
-        while (VideoCall::where('room_name', $roomName)->exists()) {
-            $roomName = 'room_' . uniqid();
+    
+        if ($booking->status != 1) {
+            return $this->error('Booking is not in the correct status.', 400);
         }
-
-        $videoCall->room_name = $roomName;
-        $videoCall->save();
+    
+        // Find or create a video call for the user-doctor pair
+        $videoCall = VideoCall::where('user_id', $booking->user_id)
+                              ->where('doctor_id', $booking->doctor_id)
+                              ->whereIn('status', ['pending', 'accepted'])
+                              ->first();
+    
+        if (!$videoCall) {
+            // Create a new video call if none exists
+            $videoCall = VideoCall::create([
+                'user_id' => $booking->user_id,
+                'doctor_id' => $booking->doctor_id,
+                'status' => 'pending',
+            ]);
+    
+            // Generate a unique room name for the new video call
+            $roomName = 'room_' . uniqid();
+            while (VideoCall::where('room_name', $roomName)->exists()) {
+                $roomName = 'room_' . uniqid();
+            }
+    
+            $videoCall->room_name = $roomName;
+            $videoCall->save();
+        } elseif ($videoCall->status === 'ended' && $videoCall->user_id === Auth::id()) {
+            // Create a new video call if the existing one is ended
+            $videoCall = VideoCall::create([
+                'user_id' => $booking->user_id,
+                'doctor_id' => $booking->doctor_id,
+                'status' => 'pending',
+            ]);
+    
+            // Generate a unique room name for the new video call
+            $roomName = 'room_' . uniqid();
+            while (VideoCall::where('room_name', $roomName)->exists()) {
+                $roomName = 'room_' . uniqid();
+            }
+    
+            $videoCall->room_name = $roomName;
+            $videoCall->save();
+        }
+    
+        // Generate token for the video call
+        $identity = $user->name;
+        $roomName = $videoCall->room_name;
+        $token = TwilioHelper::generateToken($identity, $roomName);
+    
+        $doctor = $booking->doctor; // Assuming 'doctor' is the relationship in OnlineBooking model
+        $userName = $user->name . ' ' . $user->last_name;
+        $doctorMessage = "$userName wants to call you.";
+    
+        // Define the type for the notification
+        $notificationType = 'video_call';
+        $onlineBookingId = $booking->id;
+    
+        // Assuming DoctorBookingNotification is your notification class
+        $doctor->notify(new DoctorBookingNotification($doctorMessage, $notificationType, $onlineBookingId));
+    
+        return $this->sendData('Token generated successfully', [
+            'generate_token' => $token,
+            'room_name' => $roomName,
+            'call_id' => $videoCall->id,
+        ]);
     }
-
-    // Generate token for the video call
-    $identity = $user->name;
-    $roomName = $videoCall->room_name;
-    $token = TwilioHelper::generateToken($identity, $roomName);
-
-    $doctor = $booking->doctor; // Assuming 'doctor' is the relationship in OnlineBooking model
-    $userName = $user->name . ' ' . $user->last_name;
-    $doctorMessage = "$userName wants to call you.";
-
-    // Define the type for the notification
-    $notificationType = 'video_call';
-
-
-    // Assuming DoctorBookingNotification is your notification class
-    $doctor->notify(new DoctorBookingNotification($doctorMessage,$notificationType));
-
-    return $this->sendData('Token generated successfully', [
-        'generate_token' => $token,
-        'room_name' => $roomName,
-        'call_id' => $videoCall->id, 
-
-    ]);
-}
-
+    
 
 public function startCall(Request $request)
 {

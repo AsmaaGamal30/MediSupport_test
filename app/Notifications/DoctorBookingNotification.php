@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
@@ -11,11 +10,13 @@ class DoctorBookingNotification extends Notification
 
     protected $message;
     protected $types;
+    protected $onlineBookingId;
 
-    public function __construct($message, $types = [])
+    public function __construct($message, $types = [], $onlineBookingId = null)
     {
         $this->message = $message;
         $this->types = $types;
+        $this->onlineBookingId = $onlineBookingId;
     }
 
     public function via($notifiable)
@@ -25,14 +26,10 @@ class DoctorBookingNotification extends Notification
 
     public function toArray($notifiable)
     {
-        $notificationData = [
+        return [
             'message' => $this->message,
+            'types' => $this->types,
+            'online_booking_id' => $this->onlineBookingId,
         ];
-
-        if (!empty($this->types)) {
-            $notificationData['types'] = $this->types;
-        }
-
-        return $notificationData;
     }
 }

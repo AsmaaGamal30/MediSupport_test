@@ -25,4 +25,9 @@ class OnlineBooking extends Model
     {
         return $this->hasOne(DoctorCash::class);
     }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'online_booking_id');
+    }
+
 }

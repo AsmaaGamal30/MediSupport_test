@@ -13,6 +13,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
+    protected $morphClass = 'App\Models\Notification';
+
     /**
      * The attributes that are mass assignable.
      *
