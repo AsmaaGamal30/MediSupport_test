@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
@@ -10,11 +11,13 @@ class UserBookingNotification extends Notification
 
     protected $message;
     protected $types;
+    protected $onlineBookingId;
 
-    public function __construct($message, $types = [])
+    public function __construct($message, $types = [], $onlineBookingId = null)
     {
         $this->message = $message;
         $this->types = $types;
+        $this->onlineBookingId = $onlineBookingId;
     }
 
     public function via($notifiable)
@@ -24,16 +27,10 @@ class UserBookingNotification extends Notification
 
     public function toArray($notifiable)
     {
-        // Add types to the notification array
-        $notificationData = [
+        return [
             'message' => $this->message,
+            'types' => $this->types,
+            'online_booking_id' => $this->onlineBookingId,
         ];
-
-        // Merge types if provided
-        if (!empty($this->types)) {
-            $notificationData['types'] = $this->types;
-        }
-
-        return $notificationData;
     }
 }

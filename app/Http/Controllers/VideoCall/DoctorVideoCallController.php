@@ -22,84 +22,89 @@ class DoctorVideoCallController extends Controller
     {
         $this->middleware('auth:doctor');
     }
+
+
     public function generateToken(Request $request)
     {
-        $doctor = Auth::user(); // Use Auth::user() to retrieve the authenticated user
+        $doctor = Auth::user();
         $bookingId = $request->input('booking_id');
-        $booking = OnlineBooking::findOrFail($bookingId); 
-    
-        if ($booking->status != 2) {
-            return $this->error('Booking is not in the correct status.', 400);
-        }
-    
-        // Find or create a video call for the user-doctor pair
-        $videoCall = VideoCall::where('user_id', $booking->user_id)
-                              ->where('doctor_id', $booking->doctor_id)
-                              ->whereIn('status', ['pending', 'accepted'])
-                              ->first();
-    
-        if (!$videoCall) {
-            // Create a new video call if none exists
-            $videoCall = VideoCall::create([
-                'user_id' => $booking->user_id,
-                'doctor_id' => $booking->doctor_id,
-                'status' => 'pending',
-            ]);
-    
-            // Generate a unique room name for the new video call
-            $roomName = 'room_' . uniqid();
-            while (VideoCall::where('room_name', $roomName)->exists()) {
-                $roomName = 'room_' . uniqid();
-            }
-    
-            $videoCall->room_name = $roomName;
-            $videoCall->save();
-        } elseif ($videoCall->status === 'ended' && $videoCall->user_id === $doctor->id) {
-            // Create a new video call if the existing one is ended
-            $videoCall = VideoCall::create([
-                'user_id' => $booking->user_id,
-                'doctor_id' => $booking->doctor_id,
-                'status' => 'pending',
-            ]);
-    
-            // Generate a unique room name for the new video call
-            $roomName = 'room_' . uniqid();
-            while (VideoCall::where('room_name', $roomName)->exists()) {
-                $roomName = 'room_' . uniqid();
-            }
-    
-            $videoCall->room_name = $roomName;
-            $videoCall->save();
-        }
-    
-        // Generate token for the video call
-        $identity = $doctor->name;
-        $roomName = $videoCall->room_name;
-        $token = TwilioHelper::generateToken($identity, $roomName);
-    
-       
-    
-    
         
-        // Get the doctor's name
-    $doctorName = $booking->doctor->first_name . ' ' . $booking->doctor->last_name;
+        try {
+            // Find the OnlineBooking record by ID
+            $booking = OnlineBooking::findOrFail($bookingId);
 
-    $userMessage = "Dr. $doctorName want to call you.";
-    $user = $booking->user;
-    $notificationType = 'video_call';
-    
-    $user->notify(new UserBookingNotification($userMessage,$notificationType));
+            // Check if the booking status is correct
+            if ($booking->status != 1) {
+                return $this->error('Booking is not in the correct status.', 400);
+            }
 
-        // Prepare the response data including the call_id
-        $responseData = [
-            'generate_token' => $token,
-            'room_name' => $roomName,
-            'call_id' => $videoCall->id, 
-        ];
-    
-        return $this->sendData('Token generated successfully', $responseData);
+            // Find or create a video call for the user-doctor pair
+            $videoCall = VideoCall::where('user_id', $booking->user_id)
+                                  ->where('doctor_id', $booking->doctor_id)
+                                  ->whereIn('status', ['pending', 'accepted'])
+                                  ->first();
+
+            if (!$videoCall) {
+                // Create a new video call if none exists
+                $videoCall = VideoCall::create([
+                    'user_id' => $booking->user_id,
+                    'doctor_id' => $booking->doctor_id,
+                    'status' => 'pending',
+                ]);
+
+                // Generate a unique room name for the new video call
+                $roomName = 'room_' . uniqid();
+                while (VideoCall::where('room_name', $roomName)->exists()) {
+                    $roomName = 'room_' . uniqid();
+                }
+
+                $videoCall->room_name = $roomName;
+                $videoCall->save();
+            } elseif ($videoCall->status === 'ended' && $videoCall->user_id === $doctor->id) {
+                // Create a new video call if the existing one is ended
+                $videoCall = VideoCall::create([
+                    'user_id' => $booking->user_id,
+                    'doctor_id' => $booking->doctor_id,
+                    'status' => 'pending',
+                ]);
+
+                // Generate a unique room name for the new video call
+                $roomName = 'room_' . uniqid();
+                while (VideoCall::where('room_name', $roomName)->exists()) {
+                    $roomName = 'room_' . uniqid();
+                }
+
+                $videoCall->room_name = $roomName;
+                $videoCall->save();
+            }
+
+            // Generate token for the video call
+            $identity = $doctor->name;
+            $roomName = $videoCall->room_name;
+            $token = TwilioHelper::generateToken($identity, $roomName);
+
+            // Notify the user about the booking
+            $doctorName = $booking->doctor->first_name . ' ' . $booking->doctor->last_name;
+            $userMessage = "Dr. $doctorName wants to call you.";
+            $user = $booking->user;
+            $notificationType = 'video_call';
+            $onlineBookingId = $booking->id;
+
+            $user->notify(new UserBookingNotification($userMessage, $notificationType, $onlineBookingId));
+
+            // Prepare the response data including the call_id
+            $responseData = [
+                'generate_token' => $token,
+                'room_name' => $roomName,
+                'call_id' => $videoCall->id,
+            ];
+
+            return $this->sendData('Token generated successfully', $responseData);
+        } catch (\Throwable $th) {
+            // Handle any exceptions (e.g., ModelNotFoundException)
+            return $this->error('OnlineBooking not found or invalid booking ID', 404);
+        }
     }
-    
     
 
 

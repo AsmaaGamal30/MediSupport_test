@@ -25,6 +25,7 @@ class UserNotificationController extends Controller
                     'id' => $notification->id,
                     'message' => $notification->data['message'],
                     'type' => $notification->data['types'] ?? null,
+                    'online_booking_id' => $notification->data['online_booking_id'] ?? null,
                     'read_at' => $notification->read_at,
                 ];
             });

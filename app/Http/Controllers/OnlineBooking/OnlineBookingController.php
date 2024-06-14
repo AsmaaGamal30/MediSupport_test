@@ -66,8 +66,10 @@ class OnlineBookingController extends Controller
         $userName = $user->name . ' ' . $user->last_name;
         $doctorMessage = "$userName is booking now.";
         $notificationType = 'booking_notification';
+        $onlineBookingId = $booking->id;
+
     
-        $doctor->notify(new DoctorBookingNotification($doctorMessage, $notificationType));
+        $doctor->notify(new DoctorBookingNotification($doctorMessage, $notificationType, $onlineBookingId));
     
         return $this->success('Booking request submitted successfully', 201);
     }
