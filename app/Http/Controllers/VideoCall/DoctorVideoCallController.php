@@ -34,7 +34,7 @@ class DoctorVideoCallController extends Controller
             $booking = OnlineBooking::findOrFail($bookingId);
 
             // Check if the booking status is correct
-            if ($booking->status != 1) {
+            if ($booking->status != 2) {
                 return $this->error('Booking is not in the correct status.', 400);
             }
 
