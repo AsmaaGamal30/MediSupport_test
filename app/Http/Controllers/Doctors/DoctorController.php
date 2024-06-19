@@ -103,41 +103,39 @@ class DoctorController extends Controller
         // Return the doctor resource collection
         return DoctorResource::collection($doctors);
     }
-    public function updateDoctor(UpdateDoctorRequest $request)
+    public function updateDoctor(Request $request, $id)
     {
         try {
             // Ensure the user is authenticated as a doctor
             $authenticatedDoctor = Auth::guard('doctor')->user();
             if (!$authenticatedDoctor) {
-                return $this->error('Unauthenticated', 401);
+                return response()->json(['error' => 'Unauthenticated'], 401);
             }
 
-            // Retrieve the doctor ID from the request body
-            $doctorId = $request->input('doctor_id');
-
             // Check if the authenticated doctor's ID matches the provided ID
-            if ($authenticatedDoctor->id != $doctorId) {
-                return $this->error('Unauthorized', 403);
+            if ($authenticatedDoctor->id != $id) {
+                return response()->json(['error' => 'Unauthorized'], 403);
             }
 
             // Find the doctor by ID
-            $doctor = Doctor::find($doctorId);
+            $doctor = Doctor::find($id);
 
             // Check if the doctor exists
             if (!$doctor) {
-                return $this->error('Doctor not found', 404);
+                return response()->json(['error' => 'Doctor not found'], 404);
             }
 
             // Update the doctor's data based on the validated request
-            $doctor->update($request->validated());
+            $doctor->update($request->all());
 
             // Return success response
-            return $this->success('Doctor updated successfully');
+            return response()->json(['success' => 'Doctor updated successfully']);
         } catch (\Exception $e) {
             // Return error response if an exception occurs
-            return $this->error($e->getMessage(), 500); // Internal Server Error
+            return response()->json(['error' => $e->getMessage()], 500); // Internal Server Error
         }
     }
+
 
     public function customPaginate($items, $perPage = 10)
     {

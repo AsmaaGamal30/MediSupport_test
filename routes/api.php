@@ -258,7 +258,7 @@ Route::get('/doctors/first-eight', [DoctorController::class, 'getFirstEightDocto
 // update password doctor
 Route::put('/doctor-password', [DoctorController::class, 'updatePassword'])->middleware('auth:doctor');
 //update doctor info
-Route::post('/update-doctors', [DoctorController::class, 'updateDoctor'])->middleware('auth:doctor');
+Route::post('/doctors/{id}', [DoctorController::class, 'updateDoctor']);
 
 // update password admin
 Route::post('/admin-password', [AdminAuthController::class, 'updatePassword'])->middleware('auth:admin');
