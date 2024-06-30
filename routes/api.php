@@ -7,7 +7,7 @@ use App\Http\Controllers\Doctors\DoctorController;
 use App\Http\Controllers\Article\ArticleController;
 use App\Http\Controllers\Article\ShowArticleController;
 use App\Http\Controllers\Rating\{RatingController};
-use App\Http\Controllers\contact\{ContactController};
+use App\Http\Controllers\Contact\{ContactController};
 use App\Http\Controllers\VideoCall\UserVideoCallController;
 use App\Http\Controllers\VideoCall\DoctorVideoCallController;
 use App\Http\Controllers\OnlineBooking\OnlineDoctorController;
