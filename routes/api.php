@@ -231,8 +231,7 @@ Route::get('/doctor/latest-article', [ShowArticleController::class, 'getLatestDo
 
 //doctor offline booking
 Route::controller(DoctorOfflineBookingController::class)->middleware(['custom-auth:' . 'doctor'])->prefix('doctor')->group(function () {
-    Route::post('/store-date', 'storeDate');
-    Route::post('/store-time', 'storeTime');
+    Route::post('/store-appointment', 'addAppointment');
     Route::delete('/delete-appointment', 'deleteAppointment');
     Route::put('/update-appointment', 'updateAppointment');
     Route::get('/get-all-appointment', 'getALLAppointment');
