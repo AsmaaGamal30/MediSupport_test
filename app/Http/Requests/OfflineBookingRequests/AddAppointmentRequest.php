@@ -4,7 +4,7 @@ namespace App\Http\Requests\OfflineBookingRequests;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Traits\FailedValidationResponse;
 
-class StoreTimeRequest extends FormRequest
+class AddAppointmentRequest extends FormRequest
 {
     use FailedValidationResponse;
     /**
@@ -23,8 +23,8 @@ class StoreTimeRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'date' => 'required|date|after_or_equal:today',
             'time' => 'required',
-            'date_id' =>'required|numeric|exists:dates,id',
         ];
     }
 }

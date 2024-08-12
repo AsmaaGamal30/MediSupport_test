@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\OfflineBooking\Doctor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OfflineBookingRequests\{DeleteAppointmentRequest, StoreDateRequest, StoreTimeRequest, UpdateAppointmentRequest};
+use App\Http\Requests\OfflineBookingRequests\{AddAppointmentRequest, DeleteAppointmentRequest, StoreDateRequest, StoreTimeRequest, UpdateAppointmentRequest};
 use App\Http\Resources\OfflineBooking\AppointmentResource;
 use App\Http\Resources\OfflineBooking\DoctorBookingResource;
 use App\Models\Booking;
@@ -17,39 +17,27 @@ use Carbon\Carbon;
 class DoctorOfflineBookingController extends Controller
 {
     use ApiResponse;
-    public function storeDate(StoreDateRequest $request)
+
+    public function addAppointment(AddAppointmentRequest $request)
     {
         try {
 
             $doctorId = auth()->guard('doctor')->id();
 
-            Date::create([
-                'doctor_id' => $doctorId,
-                'date' => $request->date,
-            ]);
+            $date = Date::where('doctor_id', $doctorId)
+                ->where('date', $request->date)
+                ->first();
 
-            return $this->success('Date stored successfully', 200);
-        } catch (\Exception $e) {
-            return $this->error('Failed to store date', 500);
-        }
-    } //end storeDate
-
-    public function storeTime(StoreTimeRequest $request)
-    {
-        try {
-
-            $doctorId = auth()->guard('doctor')->id();
-
-            // Check if the authenticated doctor is the same as the one who created the date
-            $date = Date::findOrFail($request->date_id);
-
-            if ($doctorId !== $date->doctor_id) {
-                return $this->error('You are not authorized to add time for this date.', 403);
+            if (!$date) {
+                $date = Date::create([
+                    'doctor_id' => $doctorId,
+                    'date' => $request->date,
+                ]);
             }
 
             // Check if the time already exists for the doctor and date
             $existingTime = Time::where('doctor_id', $doctorId)
-                ->where('date_id', $request->date_id)
+                ->where('date_id', $date->id)
                 ->where('time', $request->time)
                 ->exists();
 
@@ -57,7 +45,7 @@ class DoctorOfflineBookingController extends Controller
                 return $this->error('This time already exists for the selected date.', 422);
             }
 
-            // Check if the date associated with date_id is greater than or equal to the current date
+            // Check if the date is greater than or equal to the current date
             $selectedDate = Carbon::parse($date->date);
             $currentDate = Carbon::now();
 
@@ -65,17 +53,20 @@ class DoctorOfflineBookingController extends Controller
                 return $this->error('The selected date must be greater than or equal to the current date.', 422);
             }
 
+            // Store the time for the date
             Time::create([
                 'doctor_id' => $doctorId,
                 'time' => $request->time,
-                'date_id' => $request->date_id,
+                'date_id' => $date->id,
             ]);
 
-            return $this->success('Time stored successfully', 200);
+
+        return $this->success('Date and time stored successfully', 200);
+
         } catch (\Exception $e) {
-            return $this->error('Failed to store time', 500);
+            return $this->error('Failed to store Appointment', 500);
         }
-    } //end storeTime
+    }
 
     public function getALLAppointment()
     {
