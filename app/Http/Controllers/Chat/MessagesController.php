@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Chat;
 
+use App\Services\Chat\ChatifyMessengerService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Response;
@@ -9,7 +10,6 @@ use App\Models\ChMessage as Message;
 use App\Models\ChFavorite as Favorite;
 use App\Models\User;
 use App\Models\Doctor;
-use App\Repositories\ChatifyMessenger;
 use App\Traits\UUID;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +25,7 @@ class MessagesController extends Controller
 
     protected $chatifyMessenger;
 
-    public function __construct(ChatifyMessenger $chatifyMessenger)
+    public function __construct(ChatifyMessengerService $chatifyMessenger)
     {
         $this->chatifyMessenger = $chatifyMessenger;
     }
@@ -43,7 +43,6 @@ class MessagesController extends Controller
 
     /**
      * Authinticate the connection for pusher
-     *
      * @param Request $request
      * @return void
      */

@@ -2,39 +2,31 @@
 
 namespace App\Http\Controllers\HealthMatrix;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HealthMatrixRequests\BloodPressureRequest;
 use App\Http\Resources\BloodPressure\BloodPressureHistoryResource;
 use App\Http\Resources\BloodPressure\BloodPressureResource;
-use App\Models\BloodPressure;
-use App\Models\PressureAdvice;
+use App\Services\HealthMatrix\BloodPressureService;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Pagination\LengthAwarePaginator;
-
 
 class BloodPressureController extends Controller
 {
     use ApiResponse;
+
+    protected $bloodPressureService;
+
+    public function __construct(BloodPressureService $bloodPressureService)
+    {
+        $this->bloodPressureService = $bloodPressureService;
+    }
+
     public function store(BloodPressureRequest $request)
     {
         try {
             $validatedData = $request->validated();
 
-            $bloodPressure = new BloodPressure([
-                'user_id' => Auth::user()->id,
-                'systolic' => $validatedData['systolic'],
-                'diastolic' => $validatedData['diastolic'],
-            ]);
-
-            $pressureAdviceKey = $this->determinePressureAdvice($bloodPressure);
-
-            $bloodPressure->pressureAdvice()->associate(
-                PressureAdvice::where('key', $pressureAdviceKey)->first()
-            );
-
-            $bloodPressure->save();
+            $this->bloodPressureService->storeBloodPressure($validatedData);
 
             return $this->success('Blood pressure record created successfully', 201);
         } catch (\Exception $e) {
@@ -42,25 +34,10 @@ class BloodPressureController extends Controller
         }
     }
 
-    private function determinePressureAdvice(BloodPressure $bloodPressure): string
-    {
-        $systolic = $bloodPressure->systolic;
-        $diastolic = $bloodPressure->diastolic;
-
-        if ($systolic <= 120 && $diastolic <= 80) {
-            return 'normal';
-        } elseif ($systolic >= 130 || $diastolic >= 80) {
-            return 'high';
-        } else {
-            return 'low';
-        }
-    }
-
-
     public function getSystolicData()
     {
         try {
-            $systolicData = Auth::user()->bloodPressures()->orderBy('created_at')->pluck('systolic', 'created_at');
+            $systolicData = $this->bloodPressureService->getSystolicData();
             return $this->sendData('Systolic data retrieved successfully', $systolicData);
         } catch (\Exception $e) {
             return $this->error('Failed to fetch systolic data', 500);
@@ -70,7 +47,7 @@ class BloodPressureController extends Controller
     public function getDiastolicData()
     {
         try {
-            $diastolicData = Auth::user()->bloodPressures()->orderBy('created_at')->pluck('diastolic', 'created_at');
+            $diastolicData = $this->bloodPressureService->getDiastolicData();
             return $this->sendData('Diastolic data retrieved successfully', $diastolicData);
         } catch (\Exception $e) {
             return $this->error('Failed to fetch diastolic data', 500);
@@ -80,7 +57,7 @@ class BloodPressureController extends Controller
     public function getLatestMeasurement()
     {
         try {
-            $latestMeasurement = Auth::user()->bloodPressures()->latest()->first();
+            $latestMeasurement = $this->bloodPressureService->getLatestMeasurement();
             return new BloodPressureResource($latestMeasurement);
         } catch (\Exception $e) {
             return $this->error('Failed to fetch the latest measurement', 500);
@@ -90,7 +67,7 @@ class BloodPressureController extends Controller
     public function getLatestThreeMeasurements()
     {
         try {
-            $latestThreeMeasurements = Auth::user()->bloodPressures()->latest()->take(3)->get();
+            $latestThreeMeasurements = $this->bloodPressureService->getLatestThreeMeasurements();
             return BloodPressureHistoryResource::collection($latestThreeMeasurements);
         } catch (\Exception $e) {
             return $this->error('Failed to fetch the latest 3 measurements', 500);
@@ -100,9 +77,8 @@ class BloodPressureController extends Controller
     public function getAllMeasurements()
     {
         try {
-            $user = Auth::user();
             $perPage = 10;
-            $allMeasurements = $user->bloodPressures()->paginate($perPage);
+            $allMeasurements = $this->bloodPressureService->getAllMeasurements($perPage);
 
             return BloodPressureHistoryResource::collection($allMeasurements);
         } catch (\Exception $e) {

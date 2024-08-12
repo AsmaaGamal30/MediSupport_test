@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Services\Chat;
 
 use App\Models\ChMessage as Message;
 use App\Models\ChFavorite as Favorite;
@@ -11,7 +11,7 @@ use Exception;
 use Validator;
 
 
-class ChatifyMessenger
+class ChatifyMessengerService
 {
     public $pusher;
 

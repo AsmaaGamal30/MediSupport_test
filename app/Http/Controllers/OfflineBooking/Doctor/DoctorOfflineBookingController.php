@@ -83,9 +83,9 @@ class DoctorOfflineBookingController extends Controller
             $doctorId = auth()->guard('doctor')->id();
 
             $appointments = Doctor::findOrFail($doctorId)
-            ->dates()
-            ->with('times')
-            ->get();
+                ->dates()
+                ->with('times')
+                ->get();
 
             return $this->apiResponse(
                 data: [
@@ -95,46 +95,45 @@ class DoctorOfflineBookingController extends Controller
                 statuscode: 200,
                 error: false,
             );
-            
         } catch (\Exception $e) {
             return $this->error('Failed to retrieve dates and times', 500);
         }
-    }// end getALLAppointment
-  
+    } // end getALLAppointment
+
     public function deleteAppointment(DeleteAppointmentRequest $request)
     {
         try {
             $doctorId = auth()->guard('doctor')->id();
-    
+
             $time = Time::where('id', $request->time_id)
                 ->where('doctor_id', $doctorId)
                 ->first();
-    
+
             if (!$time) {
                 return $this->error('Time not found or you are not authorized to delete this time.', 404);
             }
-    
+
             $date = Date::where('id', $request->date_id)
                 ->where('doctor_id', $doctorId)
                 ->first();
-    
+
             if (!$date) {
                 return $this->error('Date not found or you are not authorized to delete this date.', 404);
             }
-    
+
             // Check if there are bookings associated with this date and time
             $bookingsCount = Booking::where('date_id', $date->id)
                 ->where('time_id', $time->id)
                 ->count();
-    
+
             if ($bookingsCount > 0) {
                 // If bookings exist for this time, do not delete it
                 return $this->error('Cannot delete time with associated bookings.', 403);
             }
-    
+
             // Get the count of times associated with this date
             $timesCount = Time::where('date_id', $date->id)->count();
-    
+
             if ($timesCount > 1) {
                 // If there are multiple times associated with this date, delete only the time
                 $time->delete();
@@ -143,13 +142,13 @@ class DoctorOfflineBookingController extends Controller
                 $time->delete();
                 $date->delete();
             }
-    
+
             return $this->success('Appointment deleted successfully', 200);
         } catch (\Exception $e) {
             return $this->error('Failed to delete appointment', 500);
         }
-    }//end deleteAppointment
-    
+    } //end deleteAppointment
+
     public function updateAppointment(UpdateAppointmentRequest $request)
     {
         try {
@@ -208,17 +207,17 @@ class DoctorOfflineBookingController extends Controller
                     $time->save();
                 }
             } else {
-                    $time->time = $request->new_time;
-                    $time->save();
+                $time->time = $request->new_time;
+                $time->save();
 
-                    $date->date = $request->new_date;
-                    $date->save();
+                $date->date = $request->new_date;
+                $date->save();
             }
             return $this->success('Appointment updated successfully', 200);
         } catch (\Exception $e) {
             return $this->error('Failed to update appointment', 500);
         }
-    }//end updateAppointment
+    } //end updateAppointment
 
     public function getAllOfflineBooking()
     {

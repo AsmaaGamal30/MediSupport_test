@@ -2,136 +2,58 @@
 
 namespace App\Http\Controllers\OnlineBooking;
 
-use App\Models\Doctor;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use App\Models\OnlineBooking;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Notifications\DoctorBookingNotification;
 use App\Http\Resources\OnlineBooking\OnlineBookingResource;
-use App\Http\Requests\OnlineBookingRequests\OnlineDoctorRequest;
-use App\Http\Requests\OnlineBookingRequests\DeleteBookingRequest;
-use Carbon\Carbon;
-
+use App\Services\OnlineBooking\OnlineBookingService;
 
 class OnlineBookingController extends Controller
 {
     use ApiResponse;
 
-    public function store(OnlineDoctorRequest $request)
+    protected $onlineBookingService;
+
+    public function __construct(OnlineBookingService $onlineBookingService)
+    {
+        $this->onlineBookingService = $onlineBookingService;
+    }
+
+    public function store(Request $request)
     {
         // Check if the user is authenticated
         $user = Auth::guard('user')->user();
-    
         if (!$user) {
             return $this->error('Unauthenticated', 401);
         }
-    
-        // Validate the request
-        $validator = Validator::make($request->all(), [
-            'doctor_id' => 'required|exists:doctors,id',
-        ]);
-    
-        if ($validator->fails()) {
-            return $this->error($validator->errors()->first(), 422);
-        }
-    
-        // Ensure that the specified doctor exists and is active
-        $doctor = Doctor::findOrFail($request->doctor_id);
-        if (!$doctor->active_status) {
-            return $this->error('The specified doctor is not active', 422);
-        }
-    
-        // Check if the user has made a booking with this doctor within the last 6 hours
-        $sixHoursAgo = Carbon::now()->subHours(6);
-        $previousBooking = OnlineBooking::where('user_id', $user->id)
-            ->where('doctor_id', $doctor->id)
-            ->where('created_at', '>=', $sixHoursAgo)
-            ->exists();
-    
-        if ($previousBooking) {
-            return $this->error('You cannot make another booking for this doctor at the moment. Please try again later.', 423);
-        }
-    
-        // Create a new booking
-        $booking = new OnlineBooking();
-        $booking->user_id = $user->id;
-        $booking->doctor_id = $request->doctor_id;
-        $booking->status = 0; // Assuming 0 means pending status
-        $booking->save();
-    
-        // Notify the doctor about the new booking
-        $userName = $user->name . ' ' . $user->last_name;
-        $doctorMessage = "$userName is booking now.";
-        $notificationType = 'booking_notification';
-        $onlineBookingId = $booking->id;
 
-    
-        $doctor->notify(new DoctorBookingNotification($doctorMessage, $notificationType, $onlineBookingId));
-    
-        return $this->success('Booking request submitted successfully', 201);
+        // Call the service method to store the booking
+        return $this->onlineBookingService->storeBooking($request, $user);
     }
-    
-
 
     public function getUserBookings(Request $request)
     {
         // Check if the user is authenticated
-        if (!Auth::guard('user')->check()) {
+        $user = Auth::guard('user')->user();
+        if (!$user) {
             return $this->error('Unauthenticated', 401);
         }
 
-        $userId = Auth::guard('user')->id();
-
-        $bookings = OnlineBooking::where('user_id', $userId)
-            ->with('doctor')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        // Format the collection of bookings using OnlineBookingResource
-        $formattedBookings = OnlineBookingResource::collection($bookings);
-
-        $paginationData = [
-            'first_page_url' => $bookings->url(1),
-            'last_page_url' => $bookings->url($bookings->lastPage()),
-            'prev_page_url' => $bookings->previousPageUrl(),
-            'next_page_url' => $bookings->nextPageUrl(),
-            'current_page' => $bookings->currentPage(),
-            'last_page' => $bookings->lastPage(),
-            'total' => $bookings->total(),
-
-        ];
-
-        return $this->successData('User bookings retrieved successfully', [
-            'data' => $formattedBookings,
-            'pagination' => $paginationData,
-        ]);
+        // Call the service method to get user bookings
+        return $this->onlineBookingService->getUserBookings($user->id, $request);
     }
 
     public function deleteBooking(Request $request, $id)
     {
         // Check if the user is authenticated
-        if (!Auth::guard('user')->check()) {
+        $user = Auth::guard('user')->user();
+        if (!$user) {
             return $this->error('Unauthenticated', 401);
         }
 
-        $userId = Auth::guard('user')->id();
-
-        // Find the booking by ID
-        $booking = OnlineBooking::where('user_id', $userId)
-            ->where('id', $id)
-            ->first();
-
-        // Check if the booking exists
-        if (!$booking) {
-            return $this->error('Booking not found', 404);
-        }
-
-        // Delete the booking
-        $booking->delete();
-
-        return $this->success('Booking deleted successfully');
+        // Call the service method to delete the booking
+        return $this->onlineBookingService->deleteBooking($user->id, $id);
     }
 }

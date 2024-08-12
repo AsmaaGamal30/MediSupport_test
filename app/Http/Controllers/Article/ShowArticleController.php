@@ -4,23 +4,26 @@ namespace App\Http\Controllers\Article;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Article\ArticleResource;
-use App\Models\Article;
-use Illuminate\Http\Request;
+use App\Services\Article\ShowArticleService;
 
 class ShowArticleController extends Controller
 {
+    protected $showArticleService;
+
+    public function __construct(ShowArticleService $showArticleService)
+    {
+        $this->showArticleService = $showArticleService;
+    }
+
     public function getAllDoctorArticles()
     {
-        $doctorId = auth()->guard('doctor')->id();
-        $articles = Article::where('doctor_id', $doctorId)->paginate(10);
+        $articles = $this->showArticleService->getAllDoctorArticles();
         return ArticleResource::collection($articles);
     }
 
-
     public function getLatestDoctorArticle()
     {
-        $doctorId = auth()->guard('doctor')->id();
-        $latestArticle = Article::where('doctor_id', $doctorId)->latest()->first();
+        $latestArticle = $this->showArticleService->getLatestDoctorArticle();
         return new ArticleResource($latestArticle);
     }
 }

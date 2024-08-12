@@ -2,17 +2,24 @@
 
 namespace App\Http\Controllers\Contact;
 
-use App\Models\Contact;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\ContectRequests\ContactRequest;
+use App\Http\Resources\Contact\ContactResource;
+use App\Services\Contact\ContactService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\Contact\ContactResource;
-use App\Http\Requests\ContectRequests\ContactRequest;
 
 class ContactController extends Controller
 {
     use ApiResponse;
+
+    protected $contactService;
+
+    public function __construct(ContactService $contactService)
+    {
+        $this->contactService = $contactService;
+    }
 
     public function store(ContactRequest $request)
     {
@@ -22,25 +29,20 @@ class ContactController extends Controller
         }
 
         // Validate the incoming request data
-        $validatedData = $request->validate([
-            'username' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'message' => 'required|string',
-        ]);
+        $validatedData = $request->validated();
 
+        // Store the contact using the service
+        $this->contactService->storeContact($validatedData);
 
-        $submission = Contact::create([
-            'username' => $validatedData['username'],
-            'email' => $validatedData['email'],
-            'message' => $validatedData['message'],
-        ]);
-
-        return $this->success('Contact is Sent Successfully', 200);
+        return $this->success('Contact is sent successfully', 200);
     }
 
     public function index()
     {
-        return ContactResource::collection(Contact::query()->paginate(10));
+        // Retrieve all contacts with pagination using the service
+        $contacts = $this->contactService->getAllContacts();
+
+        return ContactResource::collection($contacts);
     }
 
     public function getFirstEightContacts()
@@ -50,11 +52,9 @@ class ContactController extends Controller
             return $this->error('Unauthorized', 401);
         }
 
-        // Retrieve the first 8 contacts from the database
-        $contacts = Contact::take(8)->get();
+        // Retrieve the first 8 contacts using the service
+        $contacts = $this->contactService->getFirstEightContacts();
 
-        // Return the contact resource collection
         return ContactResource::collection($contacts);
     }
-
-    }
+}

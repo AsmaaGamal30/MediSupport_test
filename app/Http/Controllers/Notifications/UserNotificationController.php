@@ -7,32 +7,35 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ApiResponse;
+use App\Services\Notification\UserNotificationService;
 
 class UserNotificationController extends Controller
 {
     use ApiResponse;
 
+    protected $notificationService;
+
+    public function __construct(UserNotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     public function index(Request $request)
     {
-        // Check if the user is authenticated
-        if ($user = Auth::guard('user')->user()) {
-            // Return the notifications for the authenticated user
-            $notifications = $user->notifications()
-            ->orderBy('created_at', 'desc') 
-            ->get()
-            ->map(function ($notification) {
-                return [
-                    'id' => $notification->id,
-                    'message' => $notification->data['message'],
-                    'type' => $notification->data['types'] ?? null,
-                    'online_booking_id' => $notification->data['online_booking_id'] ?? null,
-                    'read_at' => $notification->read_at,
-                ];
-            });
-            return $this->successData('Notifications fetched successfully', $notifications);
-        } else {
-            // Handle the case where the user is not authenticated
-            return $this->error('User not authenticated', 401);
+        try {
+            // Check if the user is authenticated
+            if ($user = Auth::guard('user')->user()) {
+                // Fetch notifications using the service
+                $notifications = $this->notificationService->getNotifications($user);
+
+                return $this->successData('Notifications fetched successfully', $notifications);
+            } else {
+                // Handle the case where the user is not authenticated
+                return $this->error('User not authenticated', 401);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error fetching notifications: ' . $e->getMessage());
+            return $this->error('Internal Server Error', 500);
         }
     }
 
@@ -41,49 +44,38 @@ class UserNotificationController extends Controller
         try {
             // Check if the user is authenticated
             if ($user = Auth::guard('user')->user()) {
-                // Find the notification by ID for the authenticated user
-                $notification = $user->notifications()->find($id);
-                if ($notification) {
-                    // Mark the notification as read
-                    $notification->markAsRead();
-                    return $this->success('Notification marked as read');
-                } else {
-                    // Return a 404 response indicating that the notification was not found
-                    return $this->error('Notification not found', 404);
-                }
+                // Update the notification status using the service
+                $result = $this->notificationService->markNotificationAsRead($user, $id);
+
+                return $result ? $this->success('Notification marked as read')
+                    : $this->error('Notification not found', 404);
             } else {
                 // Handle the case where the user is not authenticated
                 return $this->error('User not authenticated', 401);
             }
         } catch (\Exception $e) {
-            // Log the exception for debugging
             Log::error('Error updating notification: ' . $e->getMessage());
-            // Return an error response
             return $this->error('Internal Server Error', 500);
         }
     }
 
     public function markAsRead(Request $request)
     {
-        // Check if the user is authenticated
-        $user = Auth::guard('user')->user();
-        if ($user) {
-            // Retrieve all unread notifications for the authenticated user
-            $unreadNotifications = $user->unreadNotifications;
+        try {
+            // Check if the user is authenticated
+            if ($user = Auth::guard('user')->user()) {
+                // Mark all unread notifications as read using the service
+                $result = $this->notificationService->markAllNotificationsAsRead($user);
 
-            // Check if there are any unread notifications
-            if ($unreadNotifications->isNotEmpty()) {
-                // Mark all unread notifications as read
-                $user->unreadNotifications->markAsRead();
-
-                return $this->success('Notifications marked as read');
+                return $result ? $this->success('Notifications marked as read')
+                    : $this->success('No unread notifications to mark as read');
             } else {
-                // Return a message indicating no unread notifications
-                return $this->success('No unread notifications to mark as read');
+                // Handle the case where the user is not authenticated
+                return $this->error('Unauthorized', 401);
             }
-        } else {
-            // Handle the case where the user is not authenticated
-            return $this->error('Unauthorized', 401);
+        } catch (\Exception $e) {
+            Log::error('Error marking notifications as read: ' . $e->getMessage());
+            return $this->error('Internal Server Error', 500);
         }
     }
 }
